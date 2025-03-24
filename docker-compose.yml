@@ -5,7 +5,7 @@ services:
     image: mysql:8.0
     container_name: macmorning-mysql
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT}:${MYSQL_PORT}"
     volumes:
       - ./mysql/data:/var/lib/mysql
     environment:
@@ -20,8 +20,18 @@ services:
       dockerfile: Dockerfile
     container_name: macmorning-be
     ports:
-      - "8000:8000"
+      - "${BE_PORT}:${BE_PORT}"
     env_file: .env
     depends_on:
       - db
+    restart: always
+
+  ingq-ai:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+    container_name: macmorning-ai
+    ports:
+      - "${AI_PORT}:${AI_PORT}"
+    env_file: .env
     restart: always
