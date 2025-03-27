@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: macmorning-mysql
+    ports:
+      - "${MYSQL_PORT}:${MYSQL_PORT}"
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    environment:
+      TZ: Asia/Seoul
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DB_NAME}
+    restart: always
+    
+  ingq-be:
+    build:
+      context: ./ingq
+      dockerfile: Dockerfile.local
+    container_name: macmorning-be
+    ports:
+      - "${BE_PORT}:${BE_PORT}"
+    env_file: .env
+    volumes: 
+      - ./ingq:/ingq
+      - /ingq/.venv
+    depends_on:
+      - db
+    restart: always
+    command: >
+      sh -c "uv sync --frozen --no-cache && uv run uvicorn main:app --port 8000 --host 0.0.0.0 --reload"
+
+  ingq-ai:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile.local
+    container_name: macmorning-ai
+    ports:
+      - "${AI_PORT}:${AI_PORT}"
+    env_file: .env
+    restart: always
+    

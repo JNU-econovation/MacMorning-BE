@@ -17,7 +17,7 @@ services:
   ingq-be:
     build:
       context: ./ingq
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: macmorning-be
     ports:
       - "${BE_PORT}:${BE_PORT}"
@@ -29,9 +29,24 @@ services:
   ingq-ai:
     build:
       context: ./ai
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: macmorning-ai
     ports:
       - "${AI_PORT}:${AI_PORT}"
     env_file: .env
+    restart: always
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
+    container_name: macmorning-nginx
+    ports:
+      - "${NGINX_PORT}:${NGINX_PORT}"
+    volumes:
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - ingq-be
+      - ingq-ai
     restart: always
