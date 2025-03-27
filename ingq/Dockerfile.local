@@ -1,0 +1,12 @@
+FROM python:3.11-slim
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+ENV UV_COMPILE_BYTECODE=1
+
+WORKDIR /ingq
+
+COPY . /ingq
+
+CMD ["sleep", "infinity"]
+
