@@ -7,7 +7,7 @@ services:
     ports:
       - "${MYSQL_PORT}:${MYSQL_PORT}"
     volumes:
-      - ./mysql/data:/var/lib/mysql
+      - ${MYSQL_DATA_PATH}:/var/lib/mysql
     environment:
       TZ: Asia/Seoul
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -43,10 +43,45 @@ services:
     container_name: macmorning-nginx
     ports:
       - "${NGINX_PORT}:${NGINX_PORT}"
+      - "${NGINX_SECURE_PORT}:${NGINX_SECURE_PORT}"
     volumes:
-      - ./nginx/logs:/var/log/nginx
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ${NGINX_LOG_PATH}:/var/log/nginx
+      - ${NGINX_CONF_PATH}:/etc/nginx/nginx.conf
+      - certbot_www:/var/www/certbot
+      - certbot_letsencrypt:/etc/letsencrypt
     depends_on:
       - ingq-be
       - ingq-ai
-    restart: always
+    restart: unless-stopped
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  certbot:
+    image: certbot/certbot
+    container_name: macmorning-certbot
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_letsencrypt:/etc/letsencrypt
+    entrypoint: >
+      /bin/sh -c 'trap exit TERM;
+      if [ ! -f "/etc/letsencrypt/live/${BE_DOMAIN}/fullchain.pem" ]; then
+        certbot certonly --webroot -w /var/www/certbot --email ${EMAIL} --agree-tos --no-eff-email -d ${BE_DOMAIN} --non-interactive;
+      fi;
+      
+      if [ ! -f "/etc/letsencrypt/live/${AI_DOMAIN}/fullchain.pem" ]; then
+        certbot certonly --webroot -w /var/www/certbot --email ${EMAIL} --agree-tos --no-eff-email -d ${AI_DOMAIN} --non-interactive;
+      fi;
+      exit 0;'
+    depends_on:
+      - nginx
+
+  certbot-renew:
+    image: certbot/certbot
+    container_name: macmorning-certbot-renew
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_letsencrypt:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; certbot renew; exit 0;'"
+
+volumes:
+  certbot_www:
+  certbot_letsencrypt:
