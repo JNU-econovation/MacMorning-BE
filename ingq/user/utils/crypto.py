@@ -10,7 +10,6 @@ class Crypto:
     def __init__(self):
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         key = os.getenv("ENCRYPTION_KEY")
-        print("keykeykey: ", key)
         self.fernet = Fernet(key)
 
     def encrypt(self, secret):
