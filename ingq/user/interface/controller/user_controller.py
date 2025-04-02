@@ -4,7 +4,7 @@ from user.dto.schemas import SignUpRequest, SignUpResponse
 from user.application.user_service import UserService
 
 from dependency_injector.wiring import inject, Provide
-from containers import Container
+from dependencies.containers import Container
 
 router = APIRouter(prefix="/v1")
 
