@@ -39,5 +39,10 @@ services:
     ports:
       - "${AI_PORT}:${AI_PORT}"
     env_file: .env
+    volumes: 
+    - ./ai:/ai
+    - /ai/.venv
     restart: always
+    command: >
+      sh -c "uv sync --frozen --no-cache && uv run uvicorn main:app --port 8080 --host 0.0.0.0 --reload"
     
