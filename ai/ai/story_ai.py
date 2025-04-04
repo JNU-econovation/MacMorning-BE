@@ -1,11 +1,9 @@
 from dotenv import load_dotenv
-from pathlib import Path
 from fastapi import HTTPException
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 import os
 
-env_path = Path(__file__).parent / '.env'
 load_dotenv()
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
