@@ -1,11 +1,12 @@
 import uvicorn
+from ai.story_ai import generate_story
 from fastapi import FastAPI
 
 app = FastAPI()
 
 @app.get("/")
 def test():
-    return "test success"
+    return generate_story()
 
 
 if __name__ == "__main__":
