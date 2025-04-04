@@ -12,7 +12,7 @@ class User(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     email: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(64), nullable=True)
-    nickname: Mapped[str] = mapped_column(String(10), nullable=False, unique=True)
+    nickname: Mapped[str] = mapped_column(String(10), nullable=False)
     profile_image: Mapped[str] = mapped_column(
         String(255),
         nullable=True,
