@@ -10,6 +10,7 @@ services:
       - ${MYSQL_DATA_PATH}:/var/lib/mysql
     environment:
       TZ: Asia/Seoul
+      LANG: C.UTF-8
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DB_NAME}
     restart: always
@@ -19,7 +20,25 @@ services:
       timeout: 10s
       retries: 5
       start_period: 20s
-    
+  
+  redis:
+    image: redis:latest
+    container_name: macmorning-redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+
   ingq-be:
     build:
       context: ./ingq
@@ -95,3 +114,4 @@ services:
 volumes:
   certbot_www:
   certbot_letsencrypt:
+  redis_data:
