@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from core.cors_config import CorsConfig
 from core.auth_middleware import AuthMiddleware
+from core.openapi import custom_openapi
 
 from auth.interface.controller.auth_controller import router as auth_router
 from user.interface.controller.user_controller import router as user_router
@@ -46,5 +47,7 @@ def create_app() -> FastAPI:
 
     app.include_router(auth_router)
     app.include_router(user_router)
+
+    app.openapi = lambda: custom_openapi(app, exempt_paths)
 
     return app
