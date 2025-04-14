@@ -1,6 +1,3 @@
-# login, reissue
-
-# logout을 어떻게 할지? 공통 api 써버릴까?
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 
@@ -8,6 +5,9 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
 from auth.application.auth_service import AuthService
+
+from user.dto.schemas import SignUpRequest, SignUpResponse
+from user.application.user_service import UserService
 
 from dependency_injector.wiring import inject, Provide
 from dependencies.containers import Container
@@ -51,3 +51,13 @@ async def login(
     )
 
     return response
+
+
+@router.post("/signup", status_code=201)
+@inject
+def sign_up(
+    user: SignUpRequest,
+    user_service: UserService = Depends(Provide[Container.user_service]),
+) -> SignUpResponse:
+    _user = user_service.register_user(user)
+    return _user
