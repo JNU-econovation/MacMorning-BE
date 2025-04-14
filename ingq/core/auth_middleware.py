@@ -34,12 +34,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
             else:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="올바르지 않은 토큰입니다.1",
+                    detail="올바르지 않은 토큰입니다.",
                 )
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="올바르지 않은 토큰입니다.2",
+                detail="올바르지 않은 토큰입니다.",
             )
 
         return await call_next(request)
