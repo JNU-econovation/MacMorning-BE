@@ -11,6 +11,6 @@ class AuthService:
         self.user_service = user_service
         self.auth_token_service = auth_token_service
 
-    def login(self, email: str, password: str) -> AuthToken:
+    async def login(self, email: str, password: str) -> AuthToken:
         user = self.user_service.find_user_by_email_and_password(email, password)
-        return self.auth_token_service.generate_auth_token(user.id)
+        return await self.auth_token_service.generate_auth_token(user.id)
