@@ -1,10 +1,7 @@
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
+from core.setting.load_env import REDIS_PORT, REDIS_DATABASE, REDIS_HOST
 
 
 class RedisConfig:
-    REDIS_HOST = os.getenv("REDIS_HOST")
-    REDIS_PORT = int(os.getenv("REDIS_PORT"))
-    REDIS_DATABASE = int(os.getenv("REDIS_DATABASE"))
+    REDIS_HOST = REDIS_HOST
+    REDIS_PORT = REDIS_PORT
+    REDIS_DATABASE = REDIS_DATABASE

@@ -4,12 +4,9 @@ from auth.utils.mapper import AuthMapper
 
 from dependency_injector.wiring import inject
 
-from dotenv import load_dotenv
-import os
+from core.setting.load_env import ACCESS_TOKEN_EXPIRE_MINUTES
 
-load_dotenv()
-
-ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")) * 60
+ACCESS_TOKEN_EXPIRE_SECONDS = ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
 
 class AuthTokenService:

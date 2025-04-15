@@ -6,16 +6,19 @@ from jose import JWTError, jwt
 from auth.domain.repository.refresh_token_repository import RefreshTokenRepository
 from auth.domain.role import Role
 
-from dotenv import load_dotenv
-import os
+from core.setting.load_env import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    ACCESS_SECRET_KEY,
+    REFRESH_TOKEN_EXPIRE_MINUTES,
+    REFRESH_SECRET_KEY,
+    ALGORITHM,
+)
 
-load_dotenv()
-
-ACCESS_SECRET_KEY = os.getenv("ACCESS_SECRET_KEY")
-REFRESH_SECRET_KEY = os.getenv("REFRESH_SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
-REFRESH_TOKEN_EXPIRE_MINUTES = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES"))
+ACCESS_SECRET_KEY = ACCESS_SECRET_KEY
+REFRESH_SECRET_KEY = REFRESH_SECRET_KEY
+ALGORITHM = ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_MINUTES
+REFRESH_TOKEN_EXPIRE_MINUTES = REFRESH_TOKEN_EXPIRE_MINUTES
 
 
 class JwtTokenProvider:

@@ -12,15 +12,16 @@ from user.application.user_service import UserService
 from dependency_injector.wiring import inject, Provide
 from dependencies.containers import Container
 
-from dotenv import load_dotenv
-import os
+from core.setting.load_env import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    REFRESH_TOKEN_EXPIRE_MINUTES,
+)
 
 router = APIRouter(prefix="/v1", tags=["Auth Router"])
 
 
-load_dotenv()
-ACCESS_TOKEN_EXPIRE_SECONDS = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")) * 60
-REFRESH_TOKEN_EXPIRE_SECONDS = int(os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES")) * 60
+ACCESS_TOKEN_EXPIRE_SECONDS = ACCESS_TOKEN_EXPIRE_MINUTES * 60
+REFRESH_TOKEN_EXPIRE_SECONDS = REFRESH_TOKEN_EXPIRE_MINUTES * 60
 
 
 @router.post("/login")
