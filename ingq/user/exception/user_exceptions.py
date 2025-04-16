@@ -24,6 +24,6 @@ class UserAlreadyExistsException(BusinessException):
     def __init__(self):
         super().__init__(
             code="USER003",
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_409_CONFLICT,
             detail="이미 존재하는 이메일입니다.",
         )
