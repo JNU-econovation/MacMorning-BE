@@ -80,7 +80,7 @@ class UserService:
             raise InvalidCredentialsException()
         try:
             self.crypto.verify(password, user.password)
-        except Exception:
-            raise InvalidCredentialsException()
+        except Exception as err:
+            raise InvalidCredentialsException() from err
 
         return UserMapper.to_domain_user(user)
