@@ -5,6 +5,10 @@ from core.exception.error_response import ErrorResponse, ErrorDetail
 
 from core.exception.custom_exception import BusinessException
 
+from utils.logging import get_logger
+
+logger = get_logger("EXC")
+
 
 async def business_exception_handler(request: Request, exc: BusinessException):
     return ApiResponseWrapper(
@@ -20,13 +24,14 @@ async def business_exception_handler(request: Request, exc: BusinessException):
 
 
 async def catch_all_exception_handler(request: Request, exc: Exception):
+    logger.error(f"예상치 못한 오류가 발생했습니다. 오류: {str(exc)}")
     return ApiResponseWrapper(
         status_code=500,
         content=ErrorResponse(
             error=ErrorDetail(
-                code="UNEXPECTED_EXCEPTION_0",
+                code="EXC000",
                 status=500,
-                message=f"예상치 못한 오류가 발생했습니다.\n 오류: {str(exc)}",
+                message=f"예상치 못한 오류가 발생했습니다. 오류: {str(exc)}",
             ),
         ),
     )
