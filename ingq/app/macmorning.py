@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from core.cors_config import CorsConfig
+from config.cors_config import CorsConfig
 from core.auth_middleware import AuthMiddleware
-from core.openapi import custom_openapi
+from config.openapi_config import custom_openapi
 
 from auth.interface.controller.auth_controller import router as auth_router
 
