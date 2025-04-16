@@ -32,3 +32,5 @@ archive.zip
 .env
 mysql/data/
 nginx/
+
+ingq.log*
