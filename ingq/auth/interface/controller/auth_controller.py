@@ -2,7 +2,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
+
+from core.response.api_response_wrapper import ApiResponseWrapper
+from core.response.success_response import success_response
 
 from auth.application.auth_service import AuthService
 
@@ -35,9 +37,9 @@ async def login(
         password=form_data.password,
     )
 
-    response = JSONResponse(
-        content={"token_expires_in": f"{auth_token.token_expires_in}s"}
-    )
+    response_body = {"token_expires_in": f"{auth_token.token_expires_in}s"}
+
+    response = ApiResponseWrapper(content=success_response(response_body))
 
     response.headers["Authorization"] = f"Bearer {auth_token.access_token}"
 
