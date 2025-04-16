@@ -47,7 +47,5 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 status_code=exc.status_code,
                 content=error_response.model_dump(),
             )
-        except Exception:
-            raise
 
         return await call_next(request)
