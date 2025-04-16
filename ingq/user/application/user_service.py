@@ -14,6 +14,8 @@ from utils.logging import logging
 
 from dependency_injector.wiring import inject
 
+from fastapi import HTTPException, status
+
 
 class UserService:
     @inject
@@ -62,3 +64,33 @@ class UserService:
         user.phone_number = self.crypto.phone_decrypt(user.phone_number)
         new_user = UserMapper.to_signup_response(user)
         return new_user
+
+    def find_user_by_email(self, email: str) -> UserVO:
+        user = self.user_repository.find_by_email(email)
+
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="해당하는 사용자가 없습니다.",
+            )
+
+        return UserMapper.to_domain_user(user)
+
+    def find_user_by_email_and_password(self, email: str, password: str) -> UserVO:
+        user = self.user_repository.find_by_email(email)
+
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="이메일 또는 비밀번호가 일치하지 않습니다.",
+            )
+
+        try:
+            self.crypto.verify(password, user.password)
+        except Exception:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="이메일 또는 비밀번호가 일치하지 않습니다.",
+            )
+
+        return UserMapper.to_domain_user(user)

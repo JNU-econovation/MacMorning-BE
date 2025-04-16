@@ -1,15 +1,16 @@
 from cryptography.fernet import Fernet
 from passlib.context import CryptContext
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
+from core.setting.load_env import ENCRYPTION_KEY
 
 
 class Crypto:
     def __init__(self):
+        # Password Encrypt
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        key = os.getenv("ENCRYPTION_KEY")
+
+        # Phone Number Encrypt & Decrypt
+        key = ENCRYPTION_KEY
         self.fernet = Fernet(key)
 
     def encrypt(self, secret):

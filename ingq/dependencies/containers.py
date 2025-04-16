@@ -3,10 +3,18 @@ from user.infra.repository.user_repository_impl import UserRepositoryImpl
 from user.application.user_service import UserService
 from user.application.user_validator import UserValidator
 
+from auth.application.jwt_token_provider import JwtTokenProvider
+from auth.application.auth_token_service import AuthTokenService
+from auth.application.auth_service import AuthService
+
+from auth.infra.repository.redis_refresh_token_repository import (
+    RedisRefreshTokenRepository,
+)
+
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
-        packages=["user"],
+        packages=["user", "auth"],
     )
 
     user_repository = providers.Factory(UserRepositoryImpl)
@@ -16,4 +24,16 @@ class Container(containers.DeclarativeContainer):
         UserService,
         user_repository=user_repository,
         user_validator=user_validator,
+    )
+
+    refresh_token_repository = providers.Factory(RedisRefreshTokenRepository)
+    jwt_token_provider = providers.Factory(
+        JwtTokenProvider, refresh_token_repository=refresh_token_repository
+    )
+    auth_token_service = providers.Factory(
+        AuthTokenService,
+        jwt_token_provider=jwt_token_provider,
+    )
+    auth_service = providers.Factory(
+        AuthService, user_service=user_service, auth_token_service=auth_token_service
     )

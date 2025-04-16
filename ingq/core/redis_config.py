@@ -1,0 +1,7 @@
+from core.setting.load_env import REDIS_PORT, REDIS_DATABASE, REDIS_HOST
+
+
+class RedisConfig:
+    REDIS_HOST = REDIS_HOST
+    REDIS_PORT = REDIS_PORT
+    REDIS_DATABASE = REDIS_DATABASE
