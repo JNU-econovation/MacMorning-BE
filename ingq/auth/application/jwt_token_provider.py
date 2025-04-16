@@ -59,8 +59,8 @@ class JwtTokenProvider:
     def decode_token(self, token: str, secret_key: str) -> dict:
         try:
             return jwt.decode(token, secret_key, algorithms=[ALGORITHM])
-        except JWTError:
-            raise JwtTokenValidationException()
+        except JWTError as err:
+            raise JwtTokenValidationException() from err
 
     def get_user_from_access_token(self, token: str) -> dict:
         return self.decode_token(token, ACCESS_SECRET_KEY)
@@ -73,5 +73,5 @@ class JwtTokenProvider:
         user_id = payload.get("id")
 
         if not await self.refresh_token_repository.exists_by_user_id(user_id):
-            raise RefreshTokenNotFoundException()
+            raise RefreshTokenNotFoundException() from None
         return True
