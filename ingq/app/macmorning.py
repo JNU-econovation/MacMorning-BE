@@ -10,6 +10,9 @@ from auth.interface.controller.auth_controller import router as auth_router
 from dependencies.containers import Container
 from db.redis_cache import redis_cache
 
+from core.response.api_response_wrapper import ApiResponseWrapper
+from core.exception.error_handler import register_exception_handlers
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,7 +28,7 @@ def create_app() -> FastAPI:
             "auth.interface.controller.auth_controller",
         ]
     )
-    app = FastAPI(lifespan=lifespan)
+    app = FastAPI(lifespan=lifespan, default_response_class=ApiResponseWrapper)
 
     exempt_paths = [
         "/v1/token/reissue",
@@ -46,5 +49,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
 
     app.openapi = lambda: custom_openapi(app, exempt_paths)
+
+    register_exception_handlers(app)
 
     return app
