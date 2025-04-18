@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
+from typing import Optional
+
 from book.domain.character import Character
 
 from book.dto.schemas import CreateBookRequest
@@ -10,7 +12,7 @@ from book.dto.schemas import CreateBookRequest
 
 @dataclass
 class Book:
-    id: int
+    id: Optional[int]
     user_id: str
     genre: list[str]
     gamemode: bool
@@ -20,10 +22,6 @@ class Book:
     is_storage: bool
     created_at: datetime
     updated_at: datetime
-
-    def __post_init__(self):
-        unique_genres = list(dict.fromkeys(self.genre))
-        self.genre = unique_genres[:3]
 
     @classmethod
     def create_book_request_to_book(
@@ -36,7 +34,7 @@ class Book:
             characteristic=request.character.characteristic,
         )
         return cls(
-            id=0,
+            id=None,
             user_id=user_id,
             genre=request.genre,
             gamemode=request.gamemode,
