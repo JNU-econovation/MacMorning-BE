@@ -8,22 +8,26 @@ from book.infra.db_models.book import Book
 
 
 class MysqlBookRepository(BookRepository):
-    def save(self, book: BookVO):
+    def save(self, book: BookVO) -> BookVO:
         with SessionLocal() as db:
-            new_book = Book(
-                user_id=book.user_id,
-                genre=book.genre,
-                gamemode=book.gamemode,
-                character=book.character.__dict__,
-                title=book.title,
-                background=book.background,
-                is_storage=book.is_storage,
-                created_at=book.created_at,
-                updated_at=book.updated_at,
-            )
+            try:
+                new_book = Book(
+                    user_id=book.user_id,
+                    genre=book.genre,
+                    gamemode=book.gamemode,
+                    character=book.character.__dict__,
+                    title=book.title,
+                    background=book.background,
+                    is_storage=book.is_storage,
+                    created_at=book.created_at,
+                    updated_at=book.updated_at,
+                )
 
-            db.add(new_book)
-            db.commit()
+                db.add(new_book)
+                db.commit()
+            except Exception as exc:
+                db.rollback()
+                raise exc
 
             return BookVO(
                 id=new_book.id,
