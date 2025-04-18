@@ -24,6 +24,7 @@ if DB_URL:
 
 def load_all_models():
     importlib.import_module("user.infra.db_models.user")
+    importlib.import_module("book.infra.db_models.book")
 
 
 # 모델 로드 실행
