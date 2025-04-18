@@ -6,6 +6,7 @@ from core.auth_middleware import AuthMiddleware
 from config.openapi_config import custom_openapi
 
 from auth.interface.controller.auth_controller import router as auth_router
+from book.interface.controller.book_controller import router as book_router
 
 from dependencies.containers import Container
 from db.redis_cache import redis_cache
@@ -26,6 +27,7 @@ def create_app() -> FastAPI:
     container.wire(
         modules=[
             "auth.interface.controller.auth_controller",
+            "book.interface.controller.book_controller",
         ]
     )
     app = FastAPI(lifespan=lifespan, default_response_class=ApiResponseWrapper)
@@ -47,6 +49,7 @@ def create_app() -> FastAPI:
     CorsConfig(app=app)
 
     app.include_router(auth_router)
+    app.include_router(book_router)
 
     app.openapi = lambda: custom_openapi(app, exempt_paths)
 
