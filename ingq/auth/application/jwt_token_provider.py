@@ -1,10 +1,14 @@
-from fastapi import HTTPException, status
 from dependency_injector.wiring import inject
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 
 from auth.domain.repository.refresh_token_repository import RefreshTokenRepository
 from auth.domain.role import Role
+
+from auth.exception.auth_exceptions import (
+    JwtTokenValidationException,
+    RefreshTokenNotFoundException,
+)
 
 from core.setting.load_env import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -13,12 +17,6 @@ from core.setting.load_env import (
     REFRESH_SECRET_KEY,
     ALGORITHM,
 )
-
-ACCESS_SECRET_KEY = ACCESS_SECRET_KEY
-REFRESH_SECRET_KEY = REFRESH_SECRET_KEY
-ALGORITHM = ALGORITHM
-ACCESS_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_MINUTES
-REFRESH_TOKEN_EXPIRE_MINUTES = REFRESH_TOKEN_EXPIRE_MINUTES
 
 
 class JwtTokenProvider:
@@ -61,11 +59,8 @@ class JwtTokenProvider:
     def decode_token(self, token: str, secret_key: str) -> dict:
         try:
             return jwt.decode(token, secret_key, algorithms=[ALGORITHM])
-        except JWTError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="올바르지 않은 토큰입니다.",
-            )
+        except JWTError as err:
+            raise JwtTokenValidationException() from err
 
     def get_user_from_access_token(self, token: str) -> dict:
         return self.decode_token(token, ACCESS_SECRET_KEY)
@@ -78,8 +73,5 @@ class JwtTokenProvider:
         user_id = payload.get("id")
 
         if not await self.refresh_token_repository.exists_by_user_id(user_id):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh Token을 찾을 수 없습니다.",
-            )
+            raise RefreshTokenNotFoundException() from None
         return True

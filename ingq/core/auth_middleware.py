@@ -1,7 +1,14 @@
-from fastapi import Request, HTTPException, status
+from fastapi import Request
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from auth.application.jwt_token_provider import JwtTokenProvider
 from auth.dto.schemas import CurrentUser
+from core.exception.custom_exception import BusinessException
+from core.exception.error_response import ErrorResponse, ErrorDetail
+from auth.exception.auth_exceptions import (
+    JwtTokenValidationException,
+    InvalidTokenFormatException,
+)
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -16,30 +23,29 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         token = request.headers.get("Authorization")
 
-        if not token:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Authorization 헤더가 없습니다.",
-            )
-
         try:
+            if not token:
+                raise JwtTokenValidationException()
+
+            if not token.startswith("Bearer "):
+                raise InvalidTokenFormatException()
+
             token = token.split(" ")[1]
             payload = self.jwt_token_provider.get_user_from_access_token(token)
             user_id = payload.get("id")
             role = payload.get("role")
+            request.state.current_user = CurrentUser(id=user_id, role=role)
 
-            if user_id and role:
-                request.state.current_user = CurrentUser(id=user_id, role=role)
-
-            else:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="올바르지 않은 토큰입니다.",
-                )
-        except Exception:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="올바르지 않은 토큰입니다.",
+        except BusinessException as exc:
+            error_detail = ErrorDetail(
+                code=exc.code,
+                status=exc.status_code,
+                message=exc.detail,
+            )
+            error_response = ErrorResponse(error=error_detail)
+            return JSONResponse(
+                status_code=exc.status_code,
+                content=error_response.model_dump(),
             )
 
         return await call_next(request)

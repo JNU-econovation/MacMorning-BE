@@ -10,11 +10,12 @@ from user.domain.provider import Provider
 
 from user.utils.mapper import UserMapper
 
-from utils.logging import logging
-
 from dependency_injector.wiring import inject
 
-from fastapi import HTTPException, status
+from user.exception.user_exceptions import (
+    UserNotFoundException,
+    InvalidCredentialsException,
+)
 
 
 class UserService:
@@ -28,7 +29,6 @@ class UserService:
         self.user_validator: UserValidator = user_validator
         self.ulid = ULID()
         self.crypto = Crypto()
-        self.logging = logging.getLogger()
 
     def register_user(
         self,
@@ -69,10 +69,7 @@ class UserService:
         user = self.user_repository.find_by_email(email)
 
         if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="해당하는 사용자가 없습니다.",
-            )
+            raise UserNotFoundException()
 
         return UserMapper.to_domain_user(user)
 
@@ -80,17 +77,10 @@ class UserService:
         user = self.user_repository.find_by_email(email)
 
         if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="이메일 또는 비밀번호가 일치하지 않습니다.",
-            )
-
+            raise InvalidCredentialsException()
         try:
             self.crypto.verify(password, user.password)
-        except Exception:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="이메일 또는 비밀번호가 일치하지 않습니다.",
-            )
+        except Exception as err:
+            raise InvalidCredentialsException() from err
 
         return UserMapper.to_domain_user(user)
