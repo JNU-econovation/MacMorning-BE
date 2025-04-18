@@ -6,12 +6,12 @@ from sqlalchemy import pool
 from alembic import context
 import db.database as database
 
-from core.setting.load_env import DATABASE_URL
+from core.setting.load_env import DATABASE_URL_ALEMBIC
 
 import importlib
 
 
-DB_URL = DATABASE_URL
+DB_URL = DATABASE_URL_ALEMBIC
 
 
 # this is the Alembic Config object, which provides
@@ -23,7 +23,7 @@ if DB_URL:
 
 
 def load_all_models():
-    importlib.import_module("user.infra.db_models.user")  # 다른 모델들도 추가 가능
+    importlib.import_module("user.infra.db_models.user")
 
 
 # 모델 로드 실행

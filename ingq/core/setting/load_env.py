@@ -11,8 +11,11 @@ MYSQL_HOST = os.getenv("MYSQL_HOST")
 MYSQL_PORT = os.getenv("MYSQL_PORT")
 MYSQL_DB_NAME = os.getenv("MYSQL_DB_NAME")
 
-# DB Migration(ingq/migration/env.py & ingq/db/database.py)
+# ingq/db/database.py
 DATABASE_URL = f"mysql+pymysql://{MYSQL_USERNAME}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB_NAME}"
+
+# ingq/migration/env.py
+DATABASE_URL_ALEMBIC = os.getenv("DATABASE_URL_ALEMBIC")
 
 # Redis Setting(ingq/core/redis_config.py)
 REDIS_HOST = os.getenv("REDIS_HOST")
