@@ -19,7 +19,7 @@ class Book:
     character: Character
     title: str
     background: str
-    is_storage: bool
+    is_in_progress: bool
     created_at: datetime
     updated_at: datetime
 
@@ -41,7 +41,7 @@ class Book:
             character=_character,
             title=request.title,
             background=request.background,
-            is_storage=request.is_storage,
+            is_in_progress=request.is_in_progress,
             created_at=now,
             updated_at=now,
         )

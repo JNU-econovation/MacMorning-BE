@@ -19,7 +19,7 @@ class BookMapper:
             character=_character,
             title=book.title,
             background=book.background,
-            is_storage=book.is_storage,
+            is_in_progress=book.is_in_progress,
             created_at=book.created_at,
             updated_at=book.updated_at,
         )

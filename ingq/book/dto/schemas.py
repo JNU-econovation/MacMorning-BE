@@ -31,8 +31,11 @@ class CreateBookRequest(BaseModel):
     genre: list[str] = Field(
         ..., min_items=1, max_items=3, description="최대 3개까지 장르를 선정해주세요."
     )
-    gamemode: bool = Field(..., description="게임 모드 여부")
-    character: Optional[CharacterRequest] = Field(description="주인공 정보")
+    gamemode: bool = Field(
+        ...,
+        description="게임 모드 여부 (True: 게임 모드 활성화, False: 게임 모드 비활성화)",
+    )
+    character: CharacterRequest = Field(description="주인공 정보")
     title: str = Field(
         ..., min_length=1, max_length=30, description="책 제목(최소 1글자, 최대 30글자)"
     )
@@ -42,7 +45,7 @@ class CreateBookRequest(BaseModel):
         max_length=100,
         description="주제 및 줄거리(최소 1글자, 최대 100글자)",
     )
-    is_storage: bool = Field(
+    is_in_progress: bool = Field(
         True, description="이야기 진행 여부 (True: 진행중, False: 완성)"
     )
 
@@ -63,6 +66,6 @@ class CreateBookResponse(BaseModel):
     character: CharacterResponse
     title: str
     background: str
-    is_storage: bool
+    is_in_progress: bool
     created_at: datetime
     updated_at: datetime

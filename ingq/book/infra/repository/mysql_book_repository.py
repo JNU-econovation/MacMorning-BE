@@ -18,7 +18,7 @@ class MysqlBookRepository(BookRepository):
                     character=book.character.__dict__,
                     title=book.title,
                     background=book.background,
-                    is_storage=book.is_storage,
+                    is_in_progress=book.is_in_progress,
                     created_at=book.created_at,
                     updated_at=book.updated_at,
                 )
@@ -37,7 +37,7 @@ class MysqlBookRepository(BookRepository):
                 character=CharacterVO(**new_book.character),
                 title=new_book.title,
                 background=new_book.background,
-                is_storage=new_book.is_storage,
+                is_in_progress=new_book.is_in_progress,
                 created_at=new_book.created_at,
                 updated_at=new_book.updated_at,
             )
