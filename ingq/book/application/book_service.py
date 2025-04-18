@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from book.domain.book import Book
 from book.domain.repository.book_repository import BookRepository
 
@@ -14,7 +14,7 @@ class BookService:
     def create_book(
         self, user_id: str, create_book_request: CreateBookRequest
     ) -> CreateBookResponse:
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
 
         book = Book.create_book_request_to_book(user_id, create_book_request, now)
 
