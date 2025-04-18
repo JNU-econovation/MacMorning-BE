@@ -15,8 +15,8 @@ router = APIRouter(prefix="/v1", tags=["Book Router"])
 @inject
 def create_book(
     request: Request,
-    createBookRequest: CreateBookRequest,
+    create_book_request: CreateBookRequest,
     book_service: BookService = Depends(Provide[Container.book_service]),
 ) -> CreateBookResponse:
     current_user = request.state.current_user
-    return book_service.create_book(current_user.id, createBookRequest)
+    return book_service.create_book(current_user.id, create_book_request)

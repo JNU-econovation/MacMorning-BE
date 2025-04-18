@@ -12,11 +12,11 @@ class BookService:
         self.book_repository = book_repository
 
     def create_book(
-        self, user_id: str, createBookRequest: CreateBookRequest
+        self, user_id: str, create_book_request: CreateBookRequest
     ) -> CreateBookResponse:
         now = datetime.now()
 
-        book = Book.create_book_request_to_book(user_id, createBookRequest, now)
+        book = Book.create_book_request_to_book(user_id, create_book_request, now)
 
         saved_book = self.book_repository.save(book)
 
