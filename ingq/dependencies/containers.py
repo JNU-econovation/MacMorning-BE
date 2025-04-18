@@ -11,10 +11,13 @@ from auth.infra.repository.redis_refresh_token_repository import (
     RedisRefreshTokenRepository,
 )
 
+from book.infra.repository.mysql_book_repository import MysqlBookRepository
+from book.application.book_service import BookService
+
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
-        packages=["user", "auth"],
+        packages=["user", "auth", "book"],
     )
 
     user_repository = providers.Factory(UserRepositoryImpl)
@@ -37,3 +40,6 @@ class Container(containers.DeclarativeContainer):
     auth_service = providers.Factory(
         AuthService, user_service=user_service, auth_token_service=auth_token_service
     )
+
+    book_repository = providers.Factory(MysqlBookRepository)
+    book_service = providers.Factory(BookService, book_repository=book_repository)
