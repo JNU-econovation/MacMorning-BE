@@ -96,16 +96,19 @@ def validate_and_get_cursor(
             OrderStrategy.BOOKMARK_COUNT_DESC,
             OrderStrategy.BOOKMARK_COUNT_ASC,
         ]:
-            return None
+            raise NotImplementedError(
+                f"정렬 전략 {order_strategy}에 대한 커서 처리가 아직 구현되지 않았습니다."
+            )
 
         elif order_strategy in [
             OrderStrategy.VIEW_COUNT_DESC,
             OrderStrategy.VIEW_COUNT_ASC,
         ]:
-            return None
+            raise NotImplementedError(
+                f"정렬 전략 {order_strategy}에 대한 커서 처리가 아직 구현되지 않았습니다."
+            )
 
-    except Exception as exc:
-        print(f"정렬 전략 설정 및 커서 사이에서 에러 발생: {exc}")
+    except Exception:
         raise
 
     return None
