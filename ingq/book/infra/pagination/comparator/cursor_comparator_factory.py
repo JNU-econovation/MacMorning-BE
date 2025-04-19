@@ -13,6 +13,8 @@ from book.infra.pagination.comparator.updated_at_asc_comparator import (
 )
 from book.infra.pagination.comparator.cursor_comparator import CursorComparator
 
+from book.exception.book_exception import UnsupportedStrategyException
+
 
 def get_cursor_comparator(strategy: OrderStrategy) -> CursorComparator:
     """
@@ -30,4 +32,6 @@ def get_cursor_comparator(strategy: OrderStrategy) -> CursorComparator:
     elif strategy == OrderStrategy.UPDATED_AT_ASC:
         return UpdatedAtAscComparator()
     else:
-        raise ValueError(f"Unsupported strategy: {strategy}")
+        raise UnsupportedStrategyException(
+            f"{strategy}는 지원하지 않는 order_strategy입니다."
+        )
