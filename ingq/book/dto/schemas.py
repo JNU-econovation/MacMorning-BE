@@ -1,8 +1,10 @@
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, Literal
+from typing import Optional, Literal, Any
 from datetime import datetime
 
 
+# ============================================================================
+# Book 생성 관련 DTO
 class Character(BaseModel):
     name: Optional[str] = Field(
         default=None, max_length=10, description="주인공 이름 (최대 10자)"
@@ -69,3 +71,38 @@ class CreateBookResponse(BaseModel):
     is_in_progress: bool
     created_at: datetime
     updated_at: datetime
+
+
+# ============================================================================
+# Book 조회 관련 DTO
+class BookItem(BaseModel):
+    """
+    'Home', '내 책', '이야기 도서관' 페이지에서 반환 할 Book Response DTO
+
+    Home: Best 동화책, 내가 쓴 동화책, 내가 찜한 동화책 4개씩 반환할 때 사용
+    내 책: 전체, 진행중인 이야기, 완성된 이야기 반환에 사용
+    이야기 도서관: Best 동화책, 모든 동화책, 내가 찜한 동화책 반환에 사용
+    """
+
+    id: int
+    title_img_url: str
+    title: str
+    author: str
+    background: Optional[str] = None
+    is_bookmarked: Optional[bool] = Field(
+        default=None,
+        description="로그인 완료된 사용자에게만 제공, 비로그인 시 미포함 필드",
+    )
+
+
+# ============================================================================
+# 커서 기반 페이지 네이션 관련 DTO
+class PageInfo(BaseModel):
+    has_next: bool
+    total_count: int
+
+
+class PaginatedBookItem(BaseModel):
+    books: list[BookItem]
+    next_cursor: Optional[Any]
+    page_info: PageInfo
