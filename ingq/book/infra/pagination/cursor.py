@@ -69,10 +69,10 @@ def validate_and_get_cursor(
                 created_at = datetime.fromisoformat(cursor_dict["created_at"])
                 book_id = int(cursor_dict["book_id"])
                 return CreatedAtCursor(created_at=created_at, book_id=book_id)
-            except (ValueError, TypeError):
+            except (ValueError, TypeError) as err:
                 raise OrderStrategyAndCursorParameterMismatchException(
                     "ISO 형식의 시간이 맞는지, book_id가 int인지 확인해주세요."
-                )
+                ) from err
 
         elif order_strategy in [
             OrderStrategy.UPDATED_AT_DESC,
@@ -86,10 +86,10 @@ def validate_and_get_cursor(
                 updated_at = datetime.fromisoformat(cursor_dict["updated_at"])
                 book_id = int(cursor_dict["book_id"])
                 return UpdatedAtCursor(updated_at=updated_at, book_id=book_id)
-            except (ValueError, TypeError):
+            except (ValueError, TypeError) as err:
                 raise OrderStrategyAndCursorParameterMismatchException(
                     "ISO 형식의 시간이 맞는지, book_id가 int인지 확인해주세요."
-                )
+                ) from err
 
         # TODO: 추후 구현 예정
         elif order_strategy in [
