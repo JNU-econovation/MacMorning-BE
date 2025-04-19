@@ -4,6 +4,9 @@ from datetime import datetime
 from typing import Optional, Union, Any
 
 from book.infra.pagination.order_strategy import OrderStrategy
+from book.exception.book_exception import (
+    OrderStrategyAndCursorParameterMismatchException,
+)
 
 
 @dataclass
@@ -30,6 +33,14 @@ class ViewCountCursor:
     book_id: int
 
 
+def parse_cursor(cursor: str) -> dict:
+    cursor_parts = cursor.split(",")
+    cursor_dict = {
+        k: v for k, v in (part.split(":", 1) for part in cursor_parts if ":" in part)
+    }
+    return cursor_dict
+
+
 def validate_and_get_cursor(
     cursor: Any, order_strategy: OrderStrategy
 ) -> Optional[
@@ -44,37 +55,41 @@ def validate_and_get_cursor(
         return None
 
     try:
-        cursor_parts = cursor.split(",")
-        cursor_dict = {
-            k: v
-            for k, v in (part.split(":", 1) for part in cursor_parts if ":" in part)
-        }
+        cursor_dict = parse_cursor(cursor)
 
         if order_strategy in [
             OrderStrategy.CREATED_AT_DESC,
             OrderStrategy.CREATED_AT_ASC,
         ]:
             if "created_at" not in cursor_dict or "book_id" not in cursor_dict:
-                raise ValueError("created_at 과 book_id 값을 확인해주세요.")
+                raise OrderStrategyAndCursorParameterMismatchException(
+                    "CreatedAt을 정렬 전략으로 선택하셨습니다. 커서 값으로 created_at과 book_id가 있는지 확인해주세요."
+                )
             try:
                 created_at = datetime.fromisoformat(cursor_dict["created_at"])
                 book_id = int(cursor_dict["book_id"])
                 return CreatedAtCursor(created_at=created_at, book_id=book_id)
             except (ValueError, TypeError):
-                return None
+                raise OrderStrategyAndCursorParameterMismatchException(
+                    "ISO 형식의 시간이 맞는지, book_id가 int인지 확인해주세요."
+                )
 
         elif order_strategy in [
             OrderStrategy.UPDATED_AT_DESC,
             OrderStrategy.UPDATED_AT_ASC,
         ]:
             if "updated_at" not in cursor_dict or "book_id" not in cursor_dict:
-                raise ValueError("updated_at 과 book_id 값을 확인해주세요.")
+                raise OrderStrategyAndCursorParameterMismatchException(
+                    "UpdatedAt을 정렬 전략으로 선택하셨습니다. 커서 값으로 updated_at과 book_id가 있는지 확인해주세요."
+                )
             try:
                 updated_at = datetime.fromisoformat(cursor_dict["updated_at"])
                 book_id = int(cursor_dict["book_id"])
                 return UpdatedAtCursor(updated_at=updated_at, book_id=book_id)
             except (ValueError, TypeError):
-                return None
+                raise OrderStrategyAndCursorParameterMismatchException(
+                    "ISO 형식의 시간이 맞는지, book_id가 int인지 확인해주세요."
+                )
 
         # TODO: 추후 구현 예정
         elif order_strategy in [
@@ -88,10 +103,6 @@ def validate_and_get_cursor(
             OrderStrategy.VIEW_COUNT_ASC,
         ]:
             return None
-
-    except ValueError as ve:
-        print(f"value Error 발생: {ve}")
-        raise
 
     except Exception as exc:
         print(f"정렬 전략 설정 및 커서 사이에서 에러 발생: {exc}")
