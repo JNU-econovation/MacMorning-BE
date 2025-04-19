@@ -19,6 +19,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         if request.url.path in self.exempt_paths:
+            request.state.current_user = None
             return await call_next(request)
 
         token = request.headers.get("Authorization")
