@@ -22,3 +22,12 @@ dependencies = [
     "sqlalchemy>=2.0.39",
     "uvicorn[standard]>=0.34.0",
 ]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.format]
+docstring-code-format = true

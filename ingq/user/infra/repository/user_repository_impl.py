@@ -1,7 +1,7 @@
 from db.database import SessionLocal
 from user.domain.repository.user_repository import UserRepository
-from user.infra.db_models.user import User
 from user.domain.user import User as UserVO
+from user.infra.db_models.user import User
 
 
 class UserRepositoryImpl(UserRepository):

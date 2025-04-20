@@ -1,6 +1,8 @@
 from typing import Optional
+
 import redis.asyncio as redis
 from redis.asyncio.client import Redis
+
 from config.redis_config import RedisConfig
 
 

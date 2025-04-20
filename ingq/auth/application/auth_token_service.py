@@ -1,9 +1,8 @@
+from dependency_injector.wiring import inject
+
 from auth.application.jwt_token_provider import JwtTokenProvider
 from auth.dto.schemas import AuthToken
 from auth.utils.mapper import AuthMapper
-
-from dependency_injector.wiring import inject
-
 from core.setting.load_env import ACCESS_TOKEN_EXPIRE_MINUTES
 
 ACCESS_TOKEN_EXPIRE_SECONDS = ACCESS_TOKEN_EXPIRE_MINUTES * 60

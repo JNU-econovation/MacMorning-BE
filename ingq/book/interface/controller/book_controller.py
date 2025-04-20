@@ -1,14 +1,12 @@
-from fastapi import APIRouter, Depends, Request, Query
-from typing import Optional, Any
+from typing import Any, Optional
 
-from dependency_injector.wiring import inject, Provide
-from dependencies.containers import Container
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends, Query, Request
 
 from book.application.book_service import BookService
-
 from book.dto.schemas import CreateBookRequest, CreateBookResponse, PaginatedBookItem
-
 from book.infra.pagination.order_strategy import OrderStrategy
+from dependencies.containers import Container
 
 router = APIRouter(prefix="/v1", tags=["Book Router"])
 

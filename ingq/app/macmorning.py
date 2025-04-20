@@ -1,18 +1,16 @@
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from config.cors_config import CorsConfig
-from core.auth_middleware import AuthMiddleware
-from config.openapi_config import custom_openapi
+from fastapi import FastAPI
 
 from auth.interface.controller.auth_controller import router as auth_router
 from book.interface.controller.book_controller import router as book_router
-
-from dependencies.containers import Container
-from db.redis_cache import redis_cache
-
-from core.response.api_response_wrapper import ApiResponseWrapper
+from config.cors_config import CorsConfig
+from config.openapi_config import custom_openapi
+from core.auth_middleware import AuthMiddleware
 from core.exception.error_handler import register_exception_handlers
+from core.response.api_response_wrapper import ApiResponseWrapper
+from db.redis_cache import redis_cache
+from dependencies.containers import Container
 
 
 @asynccontextmanager

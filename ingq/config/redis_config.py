@@ -1,4 +1,4 @@
-from core.setting.load_env import REDIS_PORT, REDIS_DATABASE, REDIS_HOST
+from core.setting.load_env import REDIS_DATABASE, REDIS_HOST, REDIS_PORT
 
 
 class RedisConfig:

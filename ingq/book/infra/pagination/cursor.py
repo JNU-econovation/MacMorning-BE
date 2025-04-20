@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Optional, Union
 
-from typing import Optional, Union, Any
-
-from book.infra.pagination.order_strategy import OrderStrategy
 from book.exception.book_exception import (
     OrderStrategyAndCursorParameterMismatchException,
     UnsupportedStrategyException,
 )
+from book.infra.pagination.order_strategy import OrderStrategy
 
 
 @dataclass

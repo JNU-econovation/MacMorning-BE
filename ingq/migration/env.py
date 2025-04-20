@@ -1,15 +1,11 @@
+import importlib
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
+
 import db.database as database
-
 from core.setting.load_env import DATABASE_URL_ALEMBIC
-
-import importlib
-
 
 DB_URL = DATABASE_URL_ALEMBIC
 

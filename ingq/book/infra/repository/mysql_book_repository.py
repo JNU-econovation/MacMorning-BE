@@ -1,22 +1,19 @@
-from db.database import SessionLocal
 from sqlalchemy import asc, desc
+
 from book.domain.book import Book as BookVO
 from book.domain.character import Character as CharacterVO
 from book.domain.repository.book_repository import BookRepository
-
 from book.dto.schemas import (
-    PaginatedBookItem,
-    PageInfo,
     BookItem,
+    PageInfo,
+    PaginatedBookItem,
 )
-
 from book.infra.db_models.book import Book
-
 from book.infra.pagination.comparator.cursor_comparator_factory import (
     get_cursor_comparator,
 )
 from book.infra.pagination.order_strategy import OrderStrategy
-
+from db.database import SessionLocal
 from user.infra.db_models.user import User
 
 

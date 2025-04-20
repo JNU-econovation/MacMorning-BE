@@ -1,10 +1,10 @@
 from core.setting.load_env import (
-    MYSQL_USERNAME,
-    MYSQL_HOST,
+    DATABASE_URL,
     MYSQL_DB_NAME,
+    MYSQL_HOST,
     MYSQL_PASSWORD,
     MYSQL_PORT,
-    DATABASE_URL,
+    MYSQL_USERNAME,
 )
 
 

@@ -1,8 +1,9 @@
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Any
+from typing import Any, Optional
+
 from book.domain.book import Book
-from book.infra.pagination.order_strategy import OrderStrategy
 from book.dto.schemas import PaginatedBookItem
+from book.infra.pagination.order_strategy import OrderStrategy
 
 
 class BookRepository(metaclass=ABCMeta):
