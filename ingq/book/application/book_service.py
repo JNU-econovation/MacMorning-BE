@@ -1,20 +1,16 @@
 from datetime import datetime, timezone
-
-from typing import Optional, Any
+from typing import Any, Optional
 
 from book.domain.book import Book
 from book.domain.repository.book_repository import BookRepository
-
 from book.dto.schemas import (
     CreateBookRequest,
     CreateBookResponse,
     PaginatedBookItem,
 )
-
-from book.utils.mapper import BookMapper
-
-from book.infra.pagination.order_strategy import OrderStrategy
 from book.infra.pagination.cursor import validate_and_get_cursor
+from book.infra.pagination.order_strategy import OrderStrategy
+from book.utils.mapper import BookMapper
 
 
 class BookService:

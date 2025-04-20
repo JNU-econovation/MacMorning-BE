@@ -1,19 +1,18 @@
-from book.infra.pagination.order_strategy import OrderStrategy
+from book.exception.book_exception import UnsupportedStrategyException
+from book.infra.pagination.comparator.created_at_asc_comparator import (
+    CreatedAtAscComparator,
+)
 from book.infra.pagination.comparator.created_at_desc_comparator import (
     CreatedAtDescComparator,
 )
-from book.infra.pagination.comparator.created_at_asc_comparator import (
-    CreatedAtAscComparator,
+from book.infra.pagination.comparator.cursor_comparator import CursorComparator
+from book.infra.pagination.comparator.updated_at_asc_comparator import (
+    UpdatedAtAscComparator,
 )
 from book.infra.pagination.comparator.updated_at_desc_comparator import (
     UpdatedAtDescComparator,
 )
-from book.infra.pagination.comparator.updated_at_asc_comparator import (
-    UpdatedAtAscComparator,
-)
-from book.infra.pagination.comparator.cursor_comparator import CursorComparator
-
-from book.exception.book_exception import UnsupportedStrategyException
+from book.infra.pagination.order_strategy import OrderStrategy
 
 
 def get_cursor_comparator(strategy: OrderStrategy) -> CursorComparator:

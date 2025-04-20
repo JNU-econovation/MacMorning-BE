@@ -1,18 +1,16 @@
 from dependency_injector import containers, providers
-from user.infra.repository.user_repository_impl import UserRepositoryImpl
-from user.application.user_service import UserService
-from user.application.user_validator import UserValidator
 
-from auth.application.jwt_token_provider import JwtTokenProvider
-from auth.application.auth_token_service import AuthTokenService
 from auth.application.auth_service import AuthService
-
+from auth.application.auth_token_service import AuthTokenService
+from auth.application.jwt_token_provider import JwtTokenProvider
 from auth.infra.repository.redis_refresh_token_repository import (
     RedisRefreshTokenRepository,
 )
-
-from book.infra.repository.mysql_book_repository import MysqlBookRepository
 from book.application.book_service import BookService
+from book.infra.repository.mysql_book_repository import MysqlBookRepository
+from user.application.user_service import UserService
+from user.application.user_validator import UserValidator
+from user.infra.repository.user_repository_impl import UserRepositoryImpl
 
 
 class Container(containers.DeclarativeContainer):

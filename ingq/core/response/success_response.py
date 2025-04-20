@@ -1,4 +1,5 @@
-from typing import Generic, TypeVar, Optional, Any
+from typing import Any, Generic, Optional, TypeVar
+
 from pydantic import BaseModel
 
 from core.exception.error_response import ErrorDetail

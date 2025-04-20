@@ -1,7 +1,7 @@
-from auth.application.auth_token_service import AuthTokenService
 from dependency_injector.wiring import inject
-from auth.dto.schemas import AuthToken
 
+from auth.application.auth_token_service import AuthTokenService
+from auth.dto.schemas import AuthToken
 from user.application.user_service import UserService
 
 

@@ -1,23 +1,19 @@
-from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends
-
-from core.response.api_response_wrapper import ApiResponseWrapper
-from core.response.success_response import success_response
+from fastapi.security import OAuth2PasswordRequestForm
 
 from auth.application.auth_service import AuthService
-
-from user.dto.schemas import SignUpRequest, SignUpResponse
-from user.application.user_service import UserService
-
-from dependency_injector.wiring import inject, Provide
-from dependencies.containers import Container
-
+from core.response.api_response_wrapper import ApiResponseWrapper
+from core.response.success_response import success_response
 from core.setting.load_env import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     REFRESH_TOKEN_EXPIRE_MINUTES,
 )
+from dependencies.containers import Container
+from user.application.user_service import UserService
+from user.dto.schemas import SignUpRequest, SignUpResponse
 
 router = APIRouter(prefix="/v1", tags=["Auth Router"])
 

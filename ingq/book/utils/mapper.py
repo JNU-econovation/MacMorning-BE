@@ -1,5 +1,5 @@
 from book.domain.book import Book
-from book.dto.schemas import CreateBookResponse, CharacterResponse
+from book.dto.schemas import CharacterResponse, CreateBookResponse
 
 
 class BookMapper:

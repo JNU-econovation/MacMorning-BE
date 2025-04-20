@@ -1,5 +1,4 @@
 from user.domain.user import User
-
 from user.exception.user_exceptions import UserAlreadyExistsException
 
 

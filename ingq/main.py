@@ -1,6 +1,6 @@
 import uvicorn
-from app.macmorning import create_app
 
+from app.macmorning import create_app
 
 app = create_app()
 

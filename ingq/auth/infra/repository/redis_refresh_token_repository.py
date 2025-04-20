@@ -1,5 +1,5 @@
-from db.redis_cache import redis_cache
 from auth.domain.repository.refresh_token_repository import RefreshTokenRepository
+from db.redis_cache import redis_cache
 
 
 class RedisRefreshTokenRepository(RefreshTokenRepository):

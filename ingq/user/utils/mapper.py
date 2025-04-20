@@ -1,6 +1,6 @@
+from user.domain.user import User as UserVO
 from user.dto.schemas import SignUpResponse
 from user.infra.db_models.user import User
-from user.domain.user import User as UserVO
 
 
 class UserMapper:

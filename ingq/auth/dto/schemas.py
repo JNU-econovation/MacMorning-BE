@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+
 from auth.domain.role import Role
 
 

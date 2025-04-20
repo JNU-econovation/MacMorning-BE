@@ -1,6 +1,6 @@
 from book.domain.book import Book
-from book.infra.pagination.cursor import UpdatedAtCursor
 from book.infra.pagination.comparator.cursor_comparator import CursorComparator
+from book.infra.pagination.cursor import UpdatedAtCursor
 
 
 class UpdatedAtAscComparator(CursorComparator):
