@@ -10,11 +10,11 @@ from book.dto.schemas import (
 )
 from book.infra.db_models.book import Book
 from book.infra.pagination.cursor import (
-    validate_and_get_cursor,
     BookmarkCountCursor,
-    Cursor,
     CreatedAtCursor,
+    Cursor,
     UpdatedAtCursor,
+    validate_and_get_cursor,
 )
 from book.infra.pagination.order_strategy import OrderStrategy
 from db.database import SessionLocal
