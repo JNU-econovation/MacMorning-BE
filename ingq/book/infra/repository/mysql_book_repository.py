@@ -182,7 +182,7 @@ def get_ordered_query(query, order_strategy, cursor=None):
     elif order_strategy == OrderStrategy.BOOKMARK_COUNT_DESC:
         raise NotImplementedError("bookmark_count_desc는 구현중입니다.")
     elif order_strategy == OrderStrategy.BOOKMARK_COUNT_ASC:
-        raise NotImplementedError("bookmark_count_desc는 구현중입니다.")
+        raise NotImplementedError("bookmark_count_asc는 구현중입니다.")
 
     return query
 
