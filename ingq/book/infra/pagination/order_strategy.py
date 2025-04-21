@@ -8,5 +8,3 @@ class OrderStrategy(StrEnum):
     UPDATED_AT_ASC = "updated_at_asc"
     BOOKMARK_COUNT_DESC = "bookmark_count_desc"
     BOOKMARK_COUNT_ASC = "bookmark_count_asc"
-    VIEW_COUNT_DESC = "view_count_desc"
-    VIEW_COUNT_ASC = "view_count_asc"
