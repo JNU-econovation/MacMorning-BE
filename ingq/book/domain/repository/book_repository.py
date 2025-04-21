@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Any, Optional
+from typing import Optional
 
 from book.domain.book import Book
 from book.dto.schemas import PaginatedBookItem
@@ -17,6 +17,17 @@ class BookRepository(metaclass=ABCMeta):
         user_id: Optional[str],
         limit: int,
         order_strategy: OrderStrategy,
-        cursor: Optional[Any],
+        cursor: Optional[str],
+    ) -> PaginatedBookItem:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_mybooks(
+        self,
+        user_id: str,
+        limit: int,
+        order_strategy: OrderStrategy,
+        cursor: Optional[str],
+        progress: Optional[bool],
     ) -> PaginatedBookItem:
         raise NotImplementedError
