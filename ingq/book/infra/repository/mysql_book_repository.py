@@ -82,6 +82,33 @@ class MysqlBookRepository(BookRepository):
                 books=book_items, next_cursor=next_cursor, page_info=page_info
             )
 
+    def get_mybooks(
+        self, user_id, limit, order_strategy, cursor, progress
+    ) -> PaginatedBookItem:
+        decoded_cursor = (
+            validate_and_get_cursor(cursor, order_strategy) if cursor else None
+        )
+
+        with SessionLocal() as db:
+            query = build_query_base(db, user_id, progress)
+            total_count = query.count()
+
+            query = get_ordered_query(query, order_strategy, decoded_cursor)
+
+            # books_with_username: tuple (Book, username)
+            books_with_username = query.limit(limit + 1).all()
+            has_next = len(books_with_username) > limit
+            books_to_return = books_with_username[:limit]
+
+            book_items = get_book_items(books_to_return)
+
+            next_cursor = get_next_cursor(books_to_return, order_strategy, has_next)
+            page_info = PageInfo(has_next=has_next, total_count=total_count)
+
+            return PaginatedBookItem(
+                books=book_items, next_cursor=next_cursor, page_info=page_info
+            )
+
 
 def build_query_base(db, user_id=None, progress=None):
     """
