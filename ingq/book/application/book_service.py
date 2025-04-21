@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Optional
 
 from book.domain.book import Book
 from book.domain.repository.book_repository import BookRepository
@@ -8,7 +8,6 @@ from book.dto.schemas import (
     CreateBookResponse,
     PaginatedBookItem,
 )
-from book.infra.pagination.cursor import validate_and_get_cursor
 from book.infra.pagination.order_strategy import OrderStrategy
 from book.utils.mapper import BookMapper
 
@@ -30,9 +29,24 @@ class BookService:
         user_id: Optional[str],
         limit: int,
         order_strategy: OrderStrategy,
-        cursor: Optional[Any] = None,
+        cursor: Optional[str] = None,
     ) -> PaginatedBookItem:
-        validated_cursor = validate_and_get_cursor(cursor, order_strategy)
         return self.book_repository.get_all_books(
-            user_id, limit=limit, order_strategy=order_strategy, cursor=validated_cursor
+            user_id, limit=limit, order_strategy=order_strategy, cursor=cursor
+        )
+
+    def get_mybooks(
+        self,
+        user_id: str,
+        limit: int,
+        order_strategy: OrderStrategy,
+        cursor: Optional[str] = None,
+        progress: Optional[bool] = None,
+    ) -> PaginatedBookItem:
+        return self.book_repository.get_mybooks(
+            user_id,
+            limit=limit,
+            order_strategy=order_strategy,
+            cursor=cursor,
+            progress=progress,
         )
