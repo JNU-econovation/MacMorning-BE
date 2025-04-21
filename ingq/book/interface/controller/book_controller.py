@@ -37,13 +37,13 @@ def get_all_books(
     **AccessToken 검사 필요 없는 엔드포인트**
 
     Cursor 기반 페이지네이션을 적용해 전체 책 목록 조회
+
     - limit: 페이지당 항목 수(default = 4)
-    - order_strategy: 정렬 전략(생성일자, 업데이트일자, 조회수, 북마크 기준 오름,내림 차순 제공)
-        - created_at_desc, updated_at_desc, bookmark_count_desc, view_count_desc
-        - created_at_asc, updated_at_asc, bookmark_count_asc, view_count_asc
+    - order_strategy: 정렬 전략(생성일자, 업데이트일자, 북마크 기준 오름,내림 차순 제공)
+        - created_at_desc, updated_at_desc, bookmark_count_desc
+        - created_at_asc, updated_at_asc, bookmark_count_asc
     - cursor: 이전 페이지의 마지막 항목에 대한 커서(null 가능)
-        - 입력 예시
-          created_at:2025-04-18T09:37:21,book_id:2
+        - base64로 인코딩된 값
     """
     user_id = request.state.current_user.id if request.state.current_user else None
     return book_service.get_all_books(
@@ -51,7 +51,7 @@ def get_all_books(
     )
 
 
-@router.get("/books/mybook")
+@router.get("/books/mybooks")
 @inject
 def get_mybooks(
     request: Request,
@@ -64,14 +64,14 @@ def get_mybooks(
     book_service: BookService = Depends(Provide[Container.book_service]),
 ) -> PaginatedBookItem:
     """
-    Cursor 기반 페이지네이션을 적용해 전체 책 목록 조회
+    Cursor 기반 페이지네이션을 적용해 내가 쓴 책 목록 조회
+
     - limit: 페이지당 항목 수(default = 4)
-    - order_strategy: 정렬 전략(생성일자, 업데이트일자, 조회수, 북마크 기준 오름,내림 차순 제공)
-        - created_at_desc, updated_at_desc, bookmark_count_desc, view_count_desc
-        - created_at_asc, updated_at_asc, bookmark_count_asc, view_count_asc
+    - order_strategy: 정렬 전략(생성일자, 업데이트일자, 북마크 기준 오름,내림 차순 제공)
+        - created_at_desc, updated_at_desc, bookmark_count_desc
+        - created_at_asc, updated_at_asc, bookmark_count_asc
     - cursor: 이전 페이지의 마지막 항목에 대한 커서(null 가능)
-        - 입력 예시
-          created_at:2025-04-18T09:37:21,book_id:2
+        - base64로 인코딩된 값
     - progress: 이야기 진행 여부
         - True 이면 진행중인 이야기를, False 이면 완성된 이야기, None인 경우 전체 책 반환
     """
