@@ -6,12 +6,15 @@ from datetime import datetime
 from typing import Optional, Union
 
 from book.exception.book_exception import (
+    InvalidCursorException,
     UnsupportedStrategyException,
 )
 from book.infra.pagination.order_strategy import OrderStrategy
 
 
 class Cursor(ABC):
+    expected_fields: set[str] = set()
+
     @abstractmethod
     def to_dict(self) -> dict:
         pass
@@ -26,7 +29,16 @@ class Cursor(ABC):
     def decode(cls, encoded_cursor: str) -> "Cursor":
         decoded_json = base64.urlsafe_b64decode(encoded_cursor).decode("utf-8")
         cursor_data = json.loads(decoded_json)
+        cls.validate_fields(cursor_data)
         return cls.from_dict(cursor_data)
+
+    @classmethod
+    def validate_fields(cls, cursor_data: dict):
+        unexpected_fields = set(cursor_data.keys()) - cls.expected_fields
+        if unexpected_fields:
+            raise InvalidCursorException(
+                f"{cls.__name__}에 유효하지 않은 필드가 포함되어 있습니다: {unexpected_fields}, 정렬 전략과 커서값이 일치한지 확인해주세요."
+            )
 
     @classmethod
     @abstractmethod
@@ -38,6 +50,8 @@ class Cursor(ABC):
 class CreatedAtCursor(Cursor):
     created_at: datetime
     book_id: int
+
+    expected_fields = {"created_at", "book_id"}
 
     def to_dict(self) -> dict:
         return {"created_at": self.created_at.isoformat(), "book_id": self.book_id}
@@ -54,6 +68,8 @@ class UpdatedAtCursor(Cursor):
     updated_at: datetime
     book_id: int
 
+    expected_fields = {"updated_at", "book_id"}
+
     def to_dict(self) -> dict:
         return {"updated_at": self.updated_at.isoformat(), "book_id": self.book_id}
 
@@ -68,6 +84,8 @@ class UpdatedAtCursor(Cursor):
 class BookmarkCountCursor(Cursor):
     bookmark_count: int
     book_id: int
+
+    expected_fields = {"bookmark_count", "book_id"}
 
     def to_dict(self) -> dict:
         return {"bookmark_count": self.bookmark_count, "book_id": self.book_id}
