@@ -8,6 +8,7 @@ from book.dto.schemas import (
     CreateBookResponse,
     PaginatedBookItem,
 )
+from book.exception.book_exception import BookNotFoundException
 from book.infra.pagination.order_strategy import OrderStrategy
 from book.utils.mapper import BookMapper
 
@@ -54,5 +55,5 @@ class BookService:
     def get_book_by_id_or_throw(self, book_id: int) -> Book:
         book = self.book_repository.find_by_id(book_id)
         if not book:
-            raise Exception("해당하는 책이 존재하지 않습니다.")
+            raise BookNotFoundException()
         return book
