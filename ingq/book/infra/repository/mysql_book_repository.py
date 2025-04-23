@@ -19,6 +19,7 @@ from book.infra.pagination.cursor import (
     validate_and_get_cursor,
 )
 from book.infra.pagination.order_strategy import OrderStrategy
+from bookmark.infra.db_models.bookmark import Bookmark
 from db.database import SessionLocal
 from user.infra.db_models.user import User
 
@@ -99,7 +100,6 @@ class MysqlBookRepository(BookRepository):
         decoded_cursor = (
             validate_and_get_cursor(cursor, order_strategy) if cursor else None
         )
-
         with SessionLocal() as db:
             query = build_query_base(db, user_id, progress)
             total_count = query.count()
@@ -112,6 +112,51 @@ class MysqlBookRepository(BookRepository):
             books_to_return = books_with_username[:limit]
 
             book_items = get_book_items(books_to_return)
+
+            next_cursor = get_next_cursor(books_to_return, order_strategy, has_next)
+            page_info = PageInfo(has_next=has_next, total_count=total_count)
+
+            return PaginatedBookItem(
+                books=book_items, next_cursor=next_cursor, page_info=page_info
+            )
+
+    def get_bookmarked_books(
+        self,
+        user_id: str,
+        limit: int,
+        order_strategy: OrderStrategy,
+        cursor: Optional[str],
+    ) -> PaginatedBookItem:
+        decoded_cursor = (
+            validate_and_get_cursor(cursor, order_strategy) if cursor else None
+        )
+        with SessionLocal() as db:
+            query = (
+                db.query(Book, User.username)
+                .join(Bookmark, Bookmark.book_id == Book.id)
+                .join(User, Book.user_id == User.id)
+                .filter(Bookmark.user_id == user_id)
+            )
+            total_count = query.count()
+
+            query = get_ordered_query(query, order_strategy, decoded_cursor)
+
+            # books_with_username: tuple (Book, username)
+            books_with_username = query.limit(limit + 1).all()
+            has_next = len(books_with_username) > limit
+            books_to_return = books_with_username[:limit]
+
+            book_items = [
+                BookItem(
+                    book_id=book.id,
+                    title_img_url="https://placehold.co/400",
+                    title=book.title,
+                    author=username,
+                    background=book.background,
+                    is_bookmarked=True,
+                )
+                for book, username in books_to_return
+            ]
 
             next_cursor = get_next_cursor(books_to_return, order_strategy, has_next)
             page_info = PageInfo(has_next=has_next, total_count=total_count)
