@@ -5,6 +5,9 @@ from bookmark.domain.bookmark import Bookmark
 from bookmark.domain.repository.bookmark_repository import BookmarkRepository
 from bookmark.dto.schemas import BookmarkRequest, BookmarkResponse
 
+BOOKMARK_SUCCESS_MESSAGE = "북마크 성공"
+BOOKMARK_CANCEL_MESSAGE = "북마크 취소"
+
 
 class BookmarkService:
     def __init__(
@@ -26,10 +29,10 @@ class BookmarkService:
         now = datetime.now(timezone.utc)
         if bookmark:
             self.bookmark_repository.delete(bookmark)
-            return BookmarkResponse(message="북마크 취소")
+            return BookmarkResponse(message=BOOKMARK_CANCEL_MESSAGE)
         else:
             new_bookmark = Bookmark(
                 id=None, user_id=user_id, book_id=book_id, created_at=now
             )
             self.bookmark_repository.save(new_bookmark)
-            return BookmarkResponse(message="북마크 성공")
+            return BookmarkResponse(message=BOOKMARK_SUCCESS_MESSAGE)
