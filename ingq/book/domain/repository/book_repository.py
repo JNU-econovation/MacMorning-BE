@@ -31,3 +31,7 @@ class BookRepository(metaclass=ABCMeta):
         progress: Optional[bool],
     ) -> PaginatedBookItem:
         raise NotImplementedError
+
+    @abstractmethod
+    def find_by_id(self, book_id: int) -> Optional[Book]:
+        raise NotImplementedError

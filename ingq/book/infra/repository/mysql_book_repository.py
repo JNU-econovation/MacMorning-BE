@@ -1,4 +1,5 @@
 from sqlalchemy import asc, desc
+from typing import Optional
 
 from book.domain.book import Book as BookVO
 from book.domain.character import Character as CharacterVO
@@ -107,6 +108,26 @@ class MysqlBookRepository(BookRepository):
 
             return PaginatedBookItem(
                 books=book_items, next_cursor=next_cursor, page_info=page_info
+            )
+
+    def find_by_id(self, book_id) -> Optional[BookVO]:
+        with SessionLocal() as db:
+            book = db.query(Book).filter(Book.id == book_id).first()
+
+            if not book:
+                return None
+
+            return BookVO(
+                id=book.id,
+                user_id=book.user_id,
+                genre=book.genre,
+                gamemode=book.gamemode,
+                character=CharacterVO(**book.character),
+                title=book.title,
+                background=book.background,
+                is_in_progress=book.is_in_progress,
+                created_at=book.created_at,
+                updated_at=book.updated_at,
             )
 
 
