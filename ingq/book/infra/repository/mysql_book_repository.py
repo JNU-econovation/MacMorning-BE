@@ -199,7 +199,7 @@ def get_book_items(books_with_username):
     """
     return [
         BookItem(
-            id=book.id,
+            book_id=book.id,
             title_img_url="https://placehold.co/400",
             title=book.title,
             author=username,
