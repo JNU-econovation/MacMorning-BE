@@ -83,3 +83,23 @@ def get_mybooks(
         cursor=cursor,
         progress=progress,
     )
+
+
+@router.get("/books/bookmarks")
+@inject
+def get_bookmarked_books(
+    request: Request,
+    limit: int = Query(4, ge=1, description="페이지당 항목 수"),
+    order_strategy: OrderStrategy = Query(
+        OrderStrategy.CREATED_AT_DESC, description="정렬 전략"
+    ),
+    cursor: Optional[str] = Query(None, description="커서 값"),
+    book_service: BookService = Depends(Provide[Container.book_service]),
+):
+    user_id = request.state.current_user.id
+    return book_service.get_bookmarked_books(
+        user_id,
+        limit=limit,
+        order_strategy=order_strategy,
+        cursor=cursor,
+    )
