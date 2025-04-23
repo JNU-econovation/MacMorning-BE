@@ -25,4 +25,9 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
 
-    bookmarks = relationship("Bookmark", back_populates="user")
+    bookmarks = relationship(
+        "Bookmark",
+        back_populates="user",
+        passive_deletes=True,
+        cascade="all, delete-orphan",
+    )

@@ -30,4 +30,9 @@ class Book(Base):
     )
 
     user = relationship("User", backref="books")
-    bookmarks = relationship("Bookmark", back_populates="book")
+    bookmarks = relationship(
+        "Bookmark",
+        back_populates="book",
+        passive_deletes=True,
+        cascade="all, delete-orphan",
+    )

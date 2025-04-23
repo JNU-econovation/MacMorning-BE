@@ -20,7 +20,7 @@ class Bookmark(Base):
         DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
 
-    user = relationship("User", back_populates="bookmarks", passive_deletes=True)
-    book = relationship("Book", back_populates="bookmarks", passive_deletes=True)
+    user = relationship("User", back_populates="bookmarks")
+    book = relationship("Book", back_populates="bookmarks")
 
     __table_args__ = (UniqueConstraint("user_id", "book_id", name="_user_book_uc"),)
