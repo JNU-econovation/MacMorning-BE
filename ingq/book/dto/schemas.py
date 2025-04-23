@@ -85,7 +85,7 @@ class BookItem(BaseModel):
     이야기 도서관: Best 동화책, 모든 동화책, 내가 찜한 동화책 반환에 사용
     """
 
-    id: int
+    book_id: int
     title_img_url: str
     title: str
     author: str

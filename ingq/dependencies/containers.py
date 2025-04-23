@@ -8,6 +8,8 @@ from auth.infra.repository.redis_refresh_token_repository import (
 )
 from book.application.book_service import BookService
 from book.infra.repository.mysql_book_repository import MysqlBookRepository
+from bookmark.application.bookmark_service import BookmarkService
+from bookmark.infra.repository.mysql_bookmark_repository import MysqlBookmarkRepository
 from user.application.user_service import UserService
 from user.application.user_validator import UserValidator
 from user.infra.repository.user_repository_impl import UserRepositoryImpl
@@ -15,7 +17,7 @@ from user.infra.repository.user_repository_impl import UserRepositoryImpl
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
-        packages=["user", "auth", "book"],
+        packages=["user", "auth", "book", "bookmark"],
     )
 
     user_repository = providers.Factory(UserRepositoryImpl)
@@ -41,3 +43,10 @@ class Container(containers.DeclarativeContainer):
 
     book_repository = providers.Factory(MysqlBookRepository)
     book_service = providers.Factory(BookService, book_repository=book_repository)
+
+    bookmark_repository = providers.Factory(MysqlBookmarkRepository)
+    bookmark_service = providers.Factory(
+        BookmarkService,
+        bookmark_repository=bookmark_repository,
+        book_service=book_service,
+    )
