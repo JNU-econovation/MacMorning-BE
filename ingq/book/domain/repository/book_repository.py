@@ -33,5 +33,15 @@ class BookRepository(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
+    def get_bookmarked_books(
+        self,
+        user_id: str,
+        limit: int,
+        order_strategy: OrderStrategy,
+        cursor: Optional[str],
+    ) -> PaginatedBookItem:
+        raise NotImplementedError
+
+    @abstractmethod
     def find_by_id(self, book_id: int) -> Optional[Book]:
         raise NotImplementedError
