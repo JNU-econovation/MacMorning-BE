@@ -1,5 +1,6 @@
-from sqlalchemy import asc, desc
 from typing import Optional
+
+from sqlalchemy import asc, desc
 
 from book.domain.book import Book as BookVO
 from book.domain.character import Character as CharacterVO
