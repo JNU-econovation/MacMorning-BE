@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, Enum, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.database import Base
 from user.domain.provider import Provider
@@ -24,3 +24,5 @@ class User(Base):
     provider: Mapped[Provider] = mapped_column(Enum(Provider), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+    bookmarks = relationship("Bookmark", back_populates="user")
