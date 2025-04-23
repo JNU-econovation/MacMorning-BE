@@ -12,10 +12,7 @@ from book.dto.schemas import (
 )
 from book.infra.db_models.book import Book
 from book.infra.pagination.cursor import (
-    BookmarkCountCursor,
-    CreatedAtCursor,
-    Cursor,
-    UpdatedAtCursor,
+    create_next_cursor,
     validate_and_get_cursor,
 )
 from book.infra.pagination.order_strategy import OrderStrategy
@@ -82,7 +79,8 @@ class MysqlBookRepository(BookRepository):
 
             book_items = get_book_items(books_to_return)
 
-            next_cursor = get_next_cursor(books_to_return, order_strategy, has_next)
+            books = [book for book, _ in books_to_return]
+            next_cursor = create_next_cursor(books, order_strategy, has_next)
             page_info = PageInfo(has_next=has_next, total_count=total_count)
 
             return PaginatedBookItem(
@@ -113,7 +111,8 @@ class MysqlBookRepository(BookRepository):
 
             book_items = get_book_items(books_to_return)
 
-            next_cursor = get_next_cursor(books_to_return, order_strategy, has_next)
+            books = [book for book, _ in books_to_return]
+            next_cursor = create_next_cursor(books, order_strategy, has_next)
             page_info = PageInfo(has_next=has_next, total_count=total_count)
 
             return PaginatedBookItem(
@@ -158,7 +157,8 @@ class MysqlBookRepository(BookRepository):
                 for book, username in books_to_return
             ]
 
-            next_cursor = get_next_cursor(books_to_return, order_strategy, has_next)
+            books = [book for book, _ in books_to_return]
+            next_cursor = create_next_cursor(books, order_strategy, has_next)
             page_info = PageInfo(has_next=has_next, total_count=total_count)
 
             return PaginatedBookItem(
@@ -283,40 +283,3 @@ def get_book_items(books_with_username):
         )
         for book, username in books_with_username
     ]
-
-
-def get_next_cursor(books_to_return, order_strategy, has_next):
-    """
-    CreatedAtCursor, UpdatedAtCursor, BookmarkCountCursor를 인코딩 하여 반환
-    다음 값(책)이 없는 경우 None 반환
-
-    Args
-        books_to_return: list[tuple] - (Book, username) 튜플 리스트
-        order_strategy: OrderStrategy
-        has_next: bool - 다음 Item이 있는지 판단
-
-    Returns
-        Encoding된 Cursor 값
-    """
-    if not has_next or not books_to_return:
-        return None
-
-    last_book = books_to_return[-1][0]
-
-    cursor_config = {
-        OrderStrategy.CREATED_AT_ASC: (CreatedAtCursor, "created_at"),
-        OrderStrategy.CREATED_AT_DESC: (CreatedAtCursor, "created_at"),
-        OrderStrategy.UPDATED_AT_ASC: (UpdatedAtCursor, "updated_at"),
-        OrderStrategy.UPDATED_AT_DESC: (UpdatedAtCursor, "updated_at"),
-        OrderStrategy.BOOKMARK_COUNT_ASC: (BookmarkCountCursor, "bookmark_count"),
-        OrderStrategy.BOOKMARK_COUNT_DESC: (BookmarkCountCursor, "bookmark_count"),
-    }
-
-    cursor_class, field_name = cursor_config[order_strategy]
-
-    field_value = getattr(last_book, field_name)
-
-    cursor_params = {field_name: field_value, "book_id": last_book.id}
-    cursor_instance = cursor_class(**cursor_params)
-
-    return Cursor.encode(cursor_instance)

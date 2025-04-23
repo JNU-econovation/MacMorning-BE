@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Union
 
+from book.domain.book import Book
 from book.exception.book_exception import (
     InvalidCursorException,
     UnsupportedStrategyException,
@@ -125,3 +126,30 @@ def validate_and_get_cursor(
         raise UnsupportedStrategyException(
             f"{order_strategy}는 지원하지 않는 order_strategy입니다."
         )
+
+
+def create_next_cursor(
+    books: list[Book],
+    order_strategy: OrderStrategy,
+    has_next: bool,
+) -> Optional[str]:
+    if not has_next or not books:
+        return None
+
+    last_book = books[-1]
+
+    cursor_config = {
+        OrderStrategy.CREATED_AT_ASC: (CreatedAtCursor, "created_at"),
+        OrderStrategy.CREATED_AT_DESC: (CreatedAtCursor, "created_at"),
+        OrderStrategy.UPDATED_AT_ASC: (UpdatedAtCursor, "updated_at"),
+        OrderStrategy.UPDATED_AT_DESC: (UpdatedAtCursor, "updated_at"),
+        OrderStrategy.BOOKMARK_COUNT_ASC: (BookmarkCountCursor, "bookmark_count"),
+        OrderStrategy.BOOKMARK_COUNT_DESC: (BookmarkCountCursor, "bookmark_count"),
+    }
+
+    cursor_class, field_name = cursor_config[order_strategy]
+    field_value = getattr(last_book, field_name)
+    cursor_params = {field_name: field_value, "book_id": last_book.id}
+    cursor_instance = cursor_class(**cursor_params)
+
+    return Cursor.encode(cursor_instance)
