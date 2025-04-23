@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Optional
 
 from bookmark.domain.bookmark import Bookmark
 
@@ -13,5 +14,7 @@ class BookmarkRepository(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def find_by_user_id_and_book_id(self, user_id: str, book_id: int) -> Bookmark:
+    def find_by_user_id_and_book_id(
+        self, user_id: str, book_id: int
+    ) -> Optional[Bookmark]:
         raise NotImplementedError
