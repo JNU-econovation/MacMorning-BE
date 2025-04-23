@@ -59,7 +59,11 @@ class MysqlBookRepository(BookRepository):
             )
 
     def get_all_books(
-        self, user_id, limit, order_strategy, cursor
+        self,
+        user_id: Optional[str],
+        limit: int,
+        order_strategy: OrderStrategy,
+        cursor: Optional[str],
     ) -> PaginatedBookItem:
         decoded_cursor = (
             validate_and_get_cursor(cursor, order_strategy) if cursor else None
@@ -85,7 +89,12 @@ class MysqlBookRepository(BookRepository):
             )
 
     def get_mybooks(
-        self, user_id, limit, order_strategy, cursor, progress
+        self,
+        user_id: str,
+        limit: int,
+        order_strategy: OrderStrategy,
+        cursor: Optional[str],
+        progress: Optional[bool],
     ) -> PaginatedBookItem:
         decoded_cursor = (
             validate_and_get_cursor(cursor, order_strategy) if cursor else None
@@ -111,7 +120,7 @@ class MysqlBookRepository(BookRepository):
                 books=book_items, next_cursor=next_cursor, page_info=page_info
             )
 
-    def find_by_id(self, book_id) -> Optional[BookVO]:
+    def find_by_id(self, book_id: int) -> Optional[BookVO]:
         with SessionLocal() as db:
             book = db.query(Book).filter(Book.id == book_id).first()
 

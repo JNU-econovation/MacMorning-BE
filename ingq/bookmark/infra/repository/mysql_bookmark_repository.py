@@ -38,7 +38,9 @@ class MysqlBookmarkRepository(BookmarkRepository):
                 db.rollback()
                 raise exc
 
-    def find_by_user_id_and_book_id(self, user_id, book_id) -> Optional[BookmarkVO]:
+    def find_by_user_id_and_book_id(
+        self, user_id: str, book_id: int
+    ) -> Optional[BookmarkVO]:
         with SessionLocal() as db:
             bookmark = (
                 db.query(Bookmark)
