@@ -50,24 +50,25 @@ class MysqlBookRepository(BookRepository):
             validate_and_get_cursor(cursor, order_strategy) if cursor else None
         )
         with SessionLocal() as db:
-            query = BookQueryBuilder.build_base_query(db)
+            query = BookQueryBuilder.build_all_books_query(db, user_id)
             total_count = query.count()
 
             query = BookQueryBuilder.apply_ordering_and_filtering(
                 query, order_strategy, decoded_cursor
             )
 
-            # books_with_username: tuple (Book, username)
-            books_with_username = query.limit(limit + 1).all()
-            has_next = len(books_with_username) > limit
-            books_to_return = books_with_username[:limit]
+            # books의 query 반환 결과 두 가지
+            books = query.limit(limit + 1).all()
+            has_next = len(books) > limit
+            books_to_return = books[:limit]
 
-            bookmarked_ids = None
-            if user_id:
-                bookmarked_ids = BookQueryBuilder.get_user_bookmarks(db, user_id)
-            book_items = BookMapper.to_book_items(books_to_return, bookmarked_ids)
+            if user_id:  # books: tuple[Book, str, bool] (Book, username, is_bookmarked)
+                book_items = BookMapper.to_book_items_with_info(books_to_return)
+                books = [book for book, _, _ in books_to_return]
+            else:  # books: tuple[Book, str] (Book, username)
+                book_items = BookMapper.to_book_items_with_username(books_to_return)
+                books = [book for book, _ in books_to_return]
 
-            books = [book for book, _ in books_to_return]
             next_cursor = create_next_cursor(books, order_strategy, has_next)
             page_info = PageInfo(has_next=has_next, total_count=total_count)
 
@@ -87,24 +88,21 @@ class MysqlBookRepository(BookRepository):
             validate_and_get_cursor(cursor, order_strategy) if cursor else None
         )
         with SessionLocal() as db:
-            query = BookQueryBuilder.build_base_query(db, user_id, progress)
+            query = BookQueryBuilder.build_mybooks_query(db, user_id, progress)
             total_count = query.count()
 
             query = BookQueryBuilder.apply_ordering_and_filtering(
                 query, order_strategy, decoded_cursor
             )
 
-            # books_with_username: tuple (Book, username)
-            books_with_username = query.limit(limit + 1).all()
-            has_next = len(books_with_username) > limit
-            books_to_return = books_with_username[:limit]
+            # books: tuple[Book, str, bool] (Book, username, is_bookmarked)
+            books = query.limit(limit + 1).all()
+            has_next = len(books) > limit
+            books_to_return = books[:limit]
 
-            bookmarked_ids = None
-            if user_id:
-                bookmarked_ids = BookQueryBuilder.get_user_bookmarks(db, user_id)
-            book_items = BookMapper.to_book_items(books_to_return, bookmarked_ids)
+            book_items = BookMapper.to_book_items_with_info(books_to_return)
 
-            books = [book for book, _ in books_to_return]
+            books = [book for book, _, _ in books_to_return]
             next_cursor = create_next_cursor(books, order_strategy, has_next)
             page_info = PageInfo(has_next=has_next, total_count=total_count)
 
@@ -130,13 +128,13 @@ class MysqlBookRepository(BookRepository):
                 query, order_strategy, decoded_cursor
             )
 
-            # books_with_username: tuple (Book, username)
-            books_with_username = query.limit(limit + 1).all()
-            has_next = len(books_with_username) > limit
-            books_to_return = books_with_username[:limit]
+            # books: tuple[Book, str] (Book, username)
+            books = query.limit(limit + 1).all()
+            has_next = len(books) > limit
+            books_to_return = books[:limit]
 
-            book_items = BookMapper.to_book_items(
-                books_to_return, bookmarked_ids=None, force_bookmarked=True
+            book_items = BookMapper.to_book_items_with_username(
+                books_to_return, force_bookmarked=True
             )
 
             books = [book for book, _ in books_to_return]
