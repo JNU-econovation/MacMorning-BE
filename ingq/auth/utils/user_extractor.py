@@ -7,7 +7,7 @@ from auth.dto.schemas import CurrentUser
 from core.exception.custom_exception import BusinessException
 from utils.logging import get_logger
 
-logger = get_logger()
+logger = get_logger("EXC")
 
 
 def get_optional_current_user(
@@ -22,4 +22,8 @@ def get_optional_current_user(
         except BusinessException as exc:
             logger.info(f"BusinessException 발생: {str(exc)}")
             return None
+        except Exception as exc:
+            logger.warning(f"토큰 검증 중 예외 발생: {str(exc)}")
+            return None
+
     return None
