@@ -3,6 +3,8 @@ from typing import Optional
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Query, Request
 
+from auth.application.jwt_token_provider import JwtTokenProvider
+from auth.utils.user_extractor import get_optional_current_user
 from book.application.book_service import BookService
 from book.dto.schemas import CreateBookRequest, CreateBookResponse, PaginatedBookItem
 from book.infra.pagination.order_strategy import OrderStrategy
@@ -32,6 +34,9 @@ def get_all_books(
     ),
     cursor: Optional[str] = Query(None, description="커서 값"),
     book_service: BookService = Depends(Provide[Container.book_service]),
+    jwt_token_provider: JwtTokenProvider = Depends(
+        Provide[Container.jwt_token_provider]
+    ),
 ) -> PaginatedBookItem:
     """
     **AccessToken 검사 필요 없는 엔드포인트**
@@ -45,7 +50,8 @@ def get_all_books(
     - cursor: 이전 페이지의 마지막 항목에 대한 커서(null 가능)
         - base64로 인코딩된 값
     """
-    user_id = request.state.current_user.id if request.state.current_user else None
+    current_user = get_optional_current_user(request, jwt_token_provider)
+    user_id = current_user.id if current_user else None
     return book_service.get_all_books(
         user_id, limit=limit, order_strategy=order_strategy, cursor=cursor
     )
@@ -96,6 +102,16 @@ def get_bookmarked_books(
     cursor: Optional[str] = Query(None, description="커서 값"),
     book_service: BookService = Depends(Provide[Container.book_service]),
 ):
+    """
+    Cursor 기반 페이지네이션을 적용해 내가 북마크한 책 목록 조회
+
+    - limit: 페이지당 항목 수(default = 4)
+    - order_strategy: 정렬 전략(생성일자, 업데이트일자, 북마크 기준 오름,내림 차순 제공)
+        - created_at_desc, updated_at_desc, bookmark_count_desc
+        - created_at_asc, updated_at_asc, bookmark_count_asc
+    - cursor: 이전 페이지의 마지막 항목에 대한 커서(null 가능)
+        - base64로 인코딩된 값
+    """
     user_id = request.state.current_user.id
     return book_service.get_bookmarked_books(
         user_id,
