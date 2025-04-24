@@ -14,13 +14,35 @@ from user.infra.db_models.user import User
 
 class BookQueryBuilder:
     @staticmethod
-    def build_base_query(
-        db: Session, user_id: Optional[str] = None, progress: Optional[bool] = None
-    ) -> Query:
-        query = db.query(Book, User.username).join(User, Book.user_id == User.id)
+    def build_all_books_query(db: Session, user_id: Optional[str] = None) -> Query:
+        if user_id:
+            return (
+                db.query(
+                    Book, User.username, Bookmark.id.isnot(None).label("is_bookmarked")
+                )
+                .join(User, Book.user_id == User.id)
+                .outerjoin(
+                    Bookmark,
+                    (Bookmark.book_id == Book.id) & (Bookmark.user_id == user_id),
+                )
+            )
+        else:
+            return db.query(Book, User.username).join(User, Book.user_id == User.id)
 
-        if user_id is not None:
-            query = query.filter(Book.user_id == user_id)
+    @staticmethod
+    def build_mybooks_query(
+        db: Session, user_id: str, progress: Optional[bool] = None
+    ) -> Query:
+        query = (
+            db.query(
+                Book, User.username, Bookmark.id.isnot(None).label("is_bookmarked")
+            )
+            .join(User, Book.user_id == User.id)
+            .outerjoin(
+                Bookmark, (Bookmark.book_id == Book.id) & (Bookmark.user_id == user_id)
+            )
+            .filter(Book.user_id == user_id)
+        )
 
         if progress in [True, False]:
             query = query.filter(Book.is_in_progress == progress)
@@ -35,11 +57,6 @@ class BookQueryBuilder:
             .join(User, Book.user_id == User.id)
             .filter(Bookmark.user_id == user_id)
         )
-
-    @staticmethod
-    def get_user_bookmarks(db: Session, user_id: str) -> set[int]:
-        bookmarks = db.query(Bookmark.book_id).filter(Bookmark.user_id == user_id).all()
-        return {bookmark.book_id for bookmark in bookmarks}
 
     @staticmethod
     def apply_ordering_and_filtering(
