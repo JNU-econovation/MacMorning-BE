@@ -5,11 +5,11 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Union
 
-from book.domain.book import Book
 from book.exception.book_exception import (
     InvalidCursorException,
     UnsupportedStrategyException,
 )
+from book.infra.db_models.book import Book
 from book.infra.pagination.order_strategy import OrderStrategy
 
 
