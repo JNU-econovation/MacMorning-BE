@@ -52,6 +52,20 @@ class BookService:
             progress=progress,
         )
 
+    def get_bookmarked_books(
+        self,
+        user_id: str,
+        limit: int,
+        order_strategy: OrderStrategy,
+        cursor: Optional[str] = None,
+    ) -> PaginatedBookItem:
+        return self.book_repository.get_bookmarked_books(
+            user_id,
+            limit=limit,
+            order_strategy=order_strategy,
+            cursor=cursor,
+        )
+
     def get_book_by_id_or_throw(self, book_id: int) -> Book:
         book = self.book_repository.find_by_id(book_id)
         if not book:
