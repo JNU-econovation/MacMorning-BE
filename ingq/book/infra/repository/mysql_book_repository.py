@@ -1,11 +1,8 @@
 from typing import Optional
 
-from sqlalchemy import asc, desc
-
 from book.domain.book import Book as BookVO
 from book.domain.repository.book_repository import BookRepository
 from book.dto.schemas import (
-    BookItem,
     PageInfo,
     PaginatedBookItem,
 )
@@ -15,10 +12,9 @@ from book.infra.pagination.cursor import (
     validate_and_get_cursor,
 )
 from book.infra.pagination.order_strategy import OrderStrategy
+from book.infra.repository.book_query_builder import BookQueryBuilder
 from book.utils.mapper import BookMapper
-from bookmark.infra.db_models.bookmark import Bookmark
 from db.database import SessionLocal
-from user.infra.db_models.user import User
 
 
 class MysqlBookRepository(BookRepository):
@@ -34,6 +30,15 @@ class MysqlBookRepository(BookRepository):
 
             return BookMapper.book_to_bookvo(new_book)
 
+    def find_by_id(self, book_id: int) -> Optional[BookVO]:
+        with SessionLocal() as db:
+            book = db.query(Book).filter(Book.id == book_id).first()
+
+            if not book:
+                return None
+
+            return BookMapper.book_to_bookvo(book)
+
     def get_all_books(
         self,
         user_id: Optional[str],
@@ -45,17 +50,22 @@ class MysqlBookRepository(BookRepository):
             validate_and_get_cursor(cursor, order_strategy) if cursor else None
         )
         with SessionLocal() as db:
-            query = build_query_base(db)
+            query = BookQueryBuilder.build_base_query(db)
             total_count = query.count()
 
-            query = get_ordered_query(query, order_strategy, decoded_cursor)
+            query = BookQueryBuilder.apply_ordering_and_filtering(
+                query, order_strategy, decoded_cursor
+            )
 
             # books_with_username: tuple (Book, username)
             books_with_username = query.limit(limit + 1).all()
             has_next = len(books_with_username) > limit
             books_to_return = books_with_username[:limit]
 
-            book_items = get_book_items(books_to_return)
+            bookmarked_ids = None
+            if user_id:
+                bookmarked_ids = BookQueryBuilder.get_user_bookmarks(db, user_id)
+            book_items = BookMapper.to_book_items(books_to_return, bookmarked_ids)
 
             books = [book for book, _ in books_to_return]
             next_cursor = create_next_cursor(books, order_strategy, has_next)
@@ -77,17 +87,22 @@ class MysqlBookRepository(BookRepository):
             validate_and_get_cursor(cursor, order_strategy) if cursor else None
         )
         with SessionLocal() as db:
-            query = build_query_base(db, user_id, progress)
+            query = BookQueryBuilder.build_base_query(db, user_id, progress)
             total_count = query.count()
 
-            query = get_ordered_query(query, order_strategy, decoded_cursor)
+            query = BookQueryBuilder.apply_ordering_and_filtering(
+                query, order_strategy, decoded_cursor
+            )
 
             # books_with_username: tuple (Book, username)
             books_with_username = query.limit(limit + 1).all()
             has_next = len(books_with_username) > limit
             books_to_return = books_with_username[:limit]
 
-            book_items = get_book_items(books_to_return)
+            bookmarked_ids = None
+            if user_id:
+                bookmarked_ids = BookQueryBuilder.get_user_bookmarks(db, user_id)
+            book_items = BookMapper.to_book_items(books_to_return, bookmarked_ids)
 
             books = [book for book, _ in books_to_return]
             next_cursor = create_next_cursor(books, order_strategy, has_next)
@@ -108,32 +123,21 @@ class MysqlBookRepository(BookRepository):
             validate_and_get_cursor(cursor, order_strategy) if cursor else None
         )
         with SessionLocal() as db:
-            query = (
-                db.query(Book, User.username)
-                .join(Bookmark, Bookmark.book_id == Book.id)
-                .join(User, Book.user_id == User.id)
-                .filter(Bookmark.user_id == user_id)
-            )
+            query = BookQueryBuilder.build_bookmarked_query(db, user_id)
             total_count = query.count()
 
-            query = get_ordered_query(query, order_strategy, decoded_cursor)
+            query = BookQueryBuilder.apply_ordering_and_filtering(
+                query, order_strategy, decoded_cursor
+            )
 
             # books_with_username: tuple (Book, username)
             books_with_username = query.limit(limit + 1).all()
             has_next = len(books_with_username) > limit
             books_to_return = books_with_username[:limit]
 
-            book_items = [
-                BookItem(
-                    book_id=book.id,
-                    title_img_url="https://placehold.co/400",
-                    title=book.title,
-                    author=username,
-                    background=book.background,
-                    is_bookmarked=True,
-                )
-                for book, username in books_to_return
-            ]
+            book_items = BookMapper.to_book_items(
+                books_to_return, bookmarked_ids=None, force_bookmarked=True
+            )
 
             books = [book for book, _ in books_to_return]
             next_cursor = create_next_cursor(books, order_strategy, has_next)
@@ -142,111 +146,3 @@ class MysqlBookRepository(BookRepository):
             return PaginatedBookItem(
                 books=book_items, next_cursor=next_cursor, page_info=page_info
             )
-
-    def find_by_id(self, book_id: int) -> Optional[BookVO]:
-        with SessionLocal() as db:
-            book = db.query(Book).filter(Book.id == book_id).first()
-
-            if not book:
-                return None
-
-            return BookMapper.book_to_bookvo(book)
-
-
-def build_query_base(db, user_id=None, progress=None):
-    """
-    기본적인 Book과 User 조인 쿼리를 생성하는 함수
-
-    Args
-        db: Session - db 세션 객체
-        user_id: Optional[int] - 특정 사용자의 책만 필터링할 사용자 ID
-        progress: Optional[bool] - 진행 중 여부로 필터링 (True: 진행 중, False: 완료, None: 전부)
-
-    Returns
-        query: 기본 필터가 적용된 SQLAlchemy 쿼리 객체
-    """
-    query = db.query(Book, User.username).join(User, Book.user_id == User.id)
-
-    if user_id is not None:
-        query = query.filter(Book.user_id == user_id)
-
-    if progress in [True, False]:
-        query = query.filter(Book.is_in_progress == progress)
-
-    return query
-
-
-def get_ordered_query(query, order_strategy, cursor=None):
-    """
-    정렬 전략 및 커서 조건을 적용한 쿼리 반환
-
-    Args
-        query: Query - 정렬할 SQLAlchemy 쿼리 객체
-        order_strategy: OrderStrategy - 정렬 전략 열거형 값
-            - CREATED_AT_DESC - 생성일 기준 내림차순
-            - CREATED_AT_ASC - 생성일 기준 오름차순
-            - UPDATED_AT_DESC - 수정일 기준 내림차순
-            - UPDATED_AT_ASC - 생성일 기준 오름차순
-            - BOOKMARK_COUNT_DESC - 북마크 개수 기준 내림차순
-            - BOOKMARK_COUNT_ASC - 북마크 개수 기준 오름차순
-        cursor:
-
-    Return
-        query: 정렬 및 커서 필터가 적용된 SQLAlchemy 쿼리 객체
-    """
-    if order_strategy == OrderStrategy.CREATED_AT_DESC:
-        query = query.order_by(desc(Book.created_at), desc(Book.id))
-        if cursor:
-            query = query.filter(
-                (Book.created_at < cursor.created_at)
-                | ((Book.created_at == cursor.created_at) & (Book.id < cursor.book_id))
-            )
-    elif order_strategy == OrderStrategy.CREATED_AT_ASC:
-        query = query.order_by(asc(Book.created_at), asc(Book.id))
-        if cursor:
-            query = query.filter(
-                (Book.created_at > cursor.created_at)
-                | ((Book.created_at == cursor.created_at) & (Book.id > cursor.book_id))
-            )
-    elif order_strategy == OrderStrategy.UPDATED_AT_DESC:
-        query = query.order_by(desc(Book.updated_at), desc(Book.id))
-        if cursor:
-            query = query.filter(
-                (Book.updated_at < cursor.updated_at)
-                | ((Book.updated_at == cursor.updated_at) & (Book.id < cursor.book_id))
-            )
-    elif order_strategy == OrderStrategy.UPDATED_AT_ASC:
-        query = query.order_by(asc(Book.updated_at), asc(Book.id))
-        if cursor:
-            query = query.filter(
-                (Book.updated_at > cursor.updated_at)
-                | ((Book.updated_at == cursor.updated_at) & (Book.id > cursor.book_id))
-            )
-    elif order_strategy == OrderStrategy.BOOKMARK_COUNT_DESC:
-        raise NotImplementedError("bookmark_count_desc는 구현중입니다.")
-    elif order_strategy == OrderStrategy.BOOKMARK_COUNT_ASC:
-        raise NotImplementedError("bookmark_count_asc는 구현중입니다.")
-
-    return query
-
-
-def get_book_items(books_with_username):
-    """
-    (Book, username) 튜플 리스트를 BookItem DTO로 변환하는 함수
-
-    Args
-        books_with_username: list[tuple] - (Book, username) 튜플 리스트
-
-    Returns
-        BookItem: 객체 리스트
-    """
-    return [
-        BookItem(
-            book_id=book.id,
-            title_img_url="https://placehold.co/400",
-            title=book.title,
-            author=username,
-            background=book.background,
-        )
-        for book, username in books_with_username
-    ]
