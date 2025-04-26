@@ -150,7 +150,6 @@ class BookQueryBuilder:
         query: Query, cursor: Optional[Cursor]
     ) -> Query:
         query = query.order_by(desc(literal_column("bookmark_count")), desc(Book.id))
-        print("book-query-builder-ordering:", query)
         if cursor:
             query = query.filter(
                 (

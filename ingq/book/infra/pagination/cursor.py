@@ -163,7 +163,6 @@ def create_next_bookmark_cursor(
 
     last_book = books_with_bookmark_count[-1][0]
     last_bookmark_count = books_with_bookmark_count[-1][1]
-    print("l\n\n\n:", last_book, last_bookmark_count)
     cursor_params = {"bookmark_count": last_bookmark_count, "book_id": last_book.id}
     cursor_instance = BookmarkCountCursor(**cursor_params)
 
