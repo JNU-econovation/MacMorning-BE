@@ -117,11 +117,6 @@ def validate_and_get_cursor(
         or order_strategy == OrderStrategy.UPDATED_AT_ASC
     ):
         return UpdatedAtCursor.decode(cursor)
-    elif (
-        order_strategy == OrderStrategy.BOOKMARK_COUNT_DESC
-        or order_strategy == OrderStrategy.BOOKMARK_COUNT_ASC
-    ):
-        return BookmarkCountCursor.decode(cursor)
     else:
         raise UnsupportedStrategyException(
             f"{order_strategy}는 지원하지 않는 order_strategy입니다."
@@ -143,8 +138,6 @@ def create_next_cursor(
         OrderStrategy.CREATED_AT_DESC: (CreatedAtCursor, "created_at"),
         OrderStrategy.UPDATED_AT_ASC: (UpdatedAtCursor, "updated_at"),
         OrderStrategy.UPDATED_AT_DESC: (UpdatedAtCursor, "updated_at"),
-        OrderStrategy.BOOKMARK_COUNT_ASC: (BookmarkCountCursor, "bookmark_count"),
-        OrderStrategy.BOOKMARK_COUNT_DESC: (BookmarkCountCursor, "bookmark_count"),
     }
 
     cursor_class, field_name = cursor_config[order_strategy]
