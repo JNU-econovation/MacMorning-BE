@@ -57,7 +57,7 @@ def get_all_books(
     )
 
 
-@router.get("/books/mybooks")
+@router.get("/books/mybooks", status_code=200)
 @inject
 def get_mybooks(
     request: Request,
@@ -91,7 +91,7 @@ def get_mybooks(
     )
 
 
-@router.get("/books/bookmarks")
+@router.get("/books/bookmarks", status_code=200)
 @inject
 def get_bookmarked_books(
     request: Request,
@@ -101,7 +101,7 @@ def get_bookmarked_books(
     ),
     cursor: Optional[str] = Query(None, description="커서 값"),
     book_service: BookService = Depends(Provide[Container.book_service]),
-):
+) -> PaginatedBookItem:
     """
     Cursor 기반 페이지네이션을 적용해 내가 북마크한 책 목록 조회
 
@@ -121,7 +121,7 @@ def get_bookmarked_books(
     )
 
 
-@router.get("/books/best")
+@router.get("/books/best", status_code=200)
 @inject
 def get_best_books(
     request: Request,
@@ -131,7 +131,7 @@ def get_best_books(
     jwt_token_provider: JwtTokenProvider = Depends(
         Provide[Container.jwt_token_provider]
     ),
-):
+) -> PaginatedBookItem:
     """
     Cursor 기반 페이지네이션을 적용해 북마크순 책 목록 조회
 
