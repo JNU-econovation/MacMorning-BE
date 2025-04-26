@@ -100,7 +100,7 @@ class BookmarkCountCursor(Cursor):
 
 def validate_and_get_cursor(
     cursor: str, order_strategy: OrderStrategy
-) -> Optional[Union[CreatedAtCursor, UpdatedAtCursor, BookmarkCountCursor]]:
+) -> Optional[Union[CreatedAtCursor, UpdatedAtCursor]]:
     """
     커서 형식 및 타입 검증 후 Cursor 객체 반환
     """
@@ -121,6 +121,13 @@ def validate_and_get_cursor(
         raise UnsupportedStrategyException(
             f"{order_strategy}는 지원하지 않는 order_strategy입니다."
         )
+
+
+def get_bookmark_cursor(cursor: str) -> Optional[BookmarkCountCursor]:
+    if not cursor:
+        return None
+
+    return BookmarkCountCursor.decode(cursor)
 
 
 def create_next_cursor(
@@ -144,5 +151,20 @@ def create_next_cursor(
     field_value = getattr(last_book, field_name)
     cursor_params = {field_name: field_value, "book_id": last_book.id}
     cursor_instance = cursor_class(**cursor_params)
+
+    return Cursor.encode(cursor_instance)
+
+
+def create_next_bookmark_cursor(
+    books_with_bookmark_count: list[tuple[Book, int]], has_next: bool
+) -> Optional[str]:
+    if not has_next or not books_with_bookmark_count:
+        return None
+
+    last_book = books_with_bookmark_count[-1][0]
+    last_bookmark_count = books_with_bookmark_count[-1][1]
+    print("l\n\n\n:", last_book, last_bookmark_count)
+    cursor_params = {"bookmark_count": last_bookmark_count, "book_id": last_book.id}
+    cursor_instance = BookmarkCountCursor(**cursor_params)
 
     return Cursor.encode(cursor_instance)
