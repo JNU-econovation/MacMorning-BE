@@ -8,7 +8,9 @@ from book.dto.schemas import (
 )
 from book.infra.db_models.book import Book
 from book.infra.pagination.cursor import (
+    create_next_bookmark_cursor,
     create_next_cursor,
+    get_bookmark_cursor,
     validate_and_get_cursor,
 )
 from book.infra.pagination.order_strategy import OrderStrategy
@@ -139,6 +141,52 @@ class MysqlBookRepository(BookRepository):
 
             books = [book for book, _ in books_to_return]
             next_cursor = create_next_cursor(books, order_strategy, has_next)
+            page_info = PageInfo(has_next=has_next, total_count=total_count)
+
+            return PaginatedBookItem(
+                books=book_items, next_cursor=next_cursor, page_info=page_info
+            )
+
+    def get_best_books(
+        self,
+        user_id: Optional[str],
+        limit: int,
+        cursor: Optional[str],
+    ) -> PaginatedBookItem:
+        decoded_cursor = get_bookmark_cursor(cursor) if cursor else None
+        with SessionLocal() as db:
+            query = BookQueryBuilder.build_books_by_bookmark_count_query(db, user_id)
+            total_count = query.count()
+
+            query = BookQueryBuilder.apply_ordering_and_filtering_with_bookmark_count(
+                query, decoded_cursor
+            )
+
+            books = query.limit(limit + 1).all()
+            has_next = len(books) > limit
+            books_to_return = books[:limit]
+
+            if user_id:  # books: tuple[Book, str, bool, int] (Book, username, is_bookmarked, bookmark_count)
+                book_items = BookMapper.to_book_items_with_info_and_bookmark_count(
+                    books_to_return
+                )
+
+                books_with_bookmark_count = [
+                    (book, bookmark_count)
+                    for book, _, _, bookmark_count in books_to_return
+                ]
+            else:  # books: tuple[Book, str, int] (Book, username, bookmark_count)
+                book_items = BookMapper.to_book_items_with_username_and_bookmark_count(
+                    books_to_return
+                )
+                books_with_bookmark_count = [
+                    (book, bookmark_count)
+                    for book, _, bookmark_count in books_to_return
+                ]
+
+            next_cursor = create_next_bookmark_cursor(
+                books_with_bookmark_count, has_next
+            )
             page_info = PageInfo(has_next=has_next, total_count=total_count)
 
             return PaginatedBookItem(
