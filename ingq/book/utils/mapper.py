@@ -93,3 +93,40 @@ class BookMapper:
                 )
             )
         return result
+
+    @staticmethod
+    def to_book_items_with_info_and_bookmark_count(
+        books_with_info_and_count: list[tuple[Book, str, bool, int]],
+    ) -> list[BookItem]:
+        result = []
+        for book, username, is_bookmarked, bookmark_count in books_with_info_and_count:
+            result.append(
+                BookItem(
+                    book_id=book.id,
+                    title_img_url="https://placehold.co/400",
+                    title=book.title,
+                    author=username,
+                    background=book.background,
+                    is_bookmarked=is_bookmarked,
+                    bookmark_count=bookmark_count,
+                )
+            )
+        return result
+
+    @staticmethod
+    def to_book_items_with_username_and_bookmark_count(
+        books_with_username_and_count: list[tuple[Book, str, int]],
+    ) -> list[BookItem]:
+        result = []
+        for book, username, bookmark_count in books_with_username_and_count:
+            result.append(
+                BookItem(
+                    book_id=book.id,
+                    title_img_url="https://placehold.co/400",
+                    title=book.title,
+                    author=username,
+                    background=book.background,
+                    bookmark_count=bookmark_count,
+                )
+            )
+        return result

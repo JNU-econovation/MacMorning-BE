@@ -37,6 +37,7 @@ def create_app() -> FastAPI:
         "/v1/login",
         "/v1/signup",
         "/v1/books",
+        "/v1/books/best",
         "/docs",
         "/openapi.json",
         "/redoc",

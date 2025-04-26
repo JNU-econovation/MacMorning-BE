@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import asc, desc
+from sqlalchemy import asc, desc, func, literal_column
 from sqlalchemy.orm import Query, Session
 
 from book.infra.db_models.book import Book
@@ -59,6 +59,46 @@ class BookQueryBuilder:
         )
 
     @staticmethod
+    def build_books_by_bookmark_count_query(
+        db: Session, user_id: Optional[str] = None
+    ) -> Query:
+        bookmark_count = (
+            db.query(Bookmark.book_id, func.count(Bookmark.id).label("bookmark_count"))
+            .group_by(Bookmark.book_id)
+            .subquery()
+        )
+
+        if user_id:
+            return (
+                db.query(
+                    Book,
+                    User.username,
+                    Bookmark.id.isnot(None).label("is_bookmarked"),
+                    func.coalesce(bookmark_count.c.bookmark_count, 0).label(
+                        "bookmark_count"
+                    ),
+                )
+                .join(User, Book.user_id == User.id)
+                .outerjoin(
+                    Bookmark,
+                    (Bookmark.book_id == Book.id) & (Bookmark.user_id == user_id),
+                )
+                .outerjoin(bookmark_count, Book.id == bookmark_count.c.book_id)
+            )
+        else:
+            return (
+                db.query(
+                    Book,
+                    User.username,
+                    func.coalesce(bookmark_count.c.bookmark_count, 0).label(
+                        "bookmark_count"
+                    ),
+                )
+                .join(User, Book.user_id == User.id)
+                .outerjoin(bookmark_count, Book.id == bookmark_count.c.book_id)
+            )
+
+    @staticmethod
     def apply_ordering_and_filtering(
         query: Query, order_strategy: OrderStrategy, cursor: Optional[Cursor]
     ) -> Query:
@@ -102,9 +142,26 @@ class BookQueryBuilder:
                         & (Book.id > cursor.book_id)
                     )
                 )
-        elif order_strategy == OrderStrategy.BOOKMARK_COUNT_DESC:
-            raise NotImplementedError("bookmark_count_desc는 구현중입니다.")
-        elif order_strategy == OrderStrategy.BOOKMARK_COUNT_ASC:
-            raise NotImplementedError("bookmark_count_asc는 구현중입니다.")
 
+        return query
+
+    @staticmethod
+    def apply_ordering_and_filtering_with_bookmark_count(
+        query: Query, cursor: Optional[Cursor]
+    ) -> Query:
+        query = query.order_by(desc(literal_column("bookmark_count")), desc(Book.id))
+        if cursor:
+            query = query.filter(
+                (
+                    func.coalesce(literal_column("bookmark_count"), 0)
+                    < cursor.bookmark_count
+                )
+                | (
+                    (
+                        func.coalesce(literal_column("bookmark_count"), 0)
+                        == cursor.bookmark_count
+                    )
+                    & (Book.id < cursor.book_id)
+                )
+            )
         return query

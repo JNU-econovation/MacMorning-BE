@@ -100,7 +100,7 @@ class BookmarkCountCursor(Cursor):
 
 def validate_and_get_cursor(
     cursor: str, order_strategy: OrderStrategy
-) -> Optional[Union[CreatedAtCursor, UpdatedAtCursor, BookmarkCountCursor]]:
+) -> Optional[Union[CreatedAtCursor, UpdatedAtCursor]]:
     """
     커서 형식 및 타입 검증 후 Cursor 객체 반환
     """
@@ -117,15 +117,17 @@ def validate_and_get_cursor(
         or order_strategy == OrderStrategy.UPDATED_AT_ASC
     ):
         return UpdatedAtCursor.decode(cursor)
-    elif (
-        order_strategy == OrderStrategy.BOOKMARK_COUNT_DESC
-        or order_strategy == OrderStrategy.BOOKMARK_COUNT_ASC
-    ):
-        return BookmarkCountCursor.decode(cursor)
     else:
         raise UnsupportedStrategyException(
             f"{order_strategy}는 지원하지 않는 order_strategy입니다."
         )
+
+
+def get_bookmark_cursor(cursor: str) -> Optional[BookmarkCountCursor]:
+    if not cursor:
+        return None
+
+    return BookmarkCountCursor.decode(cursor)
 
 
 def create_next_cursor(
@@ -143,13 +145,25 @@ def create_next_cursor(
         OrderStrategy.CREATED_AT_DESC: (CreatedAtCursor, "created_at"),
         OrderStrategy.UPDATED_AT_ASC: (UpdatedAtCursor, "updated_at"),
         OrderStrategy.UPDATED_AT_DESC: (UpdatedAtCursor, "updated_at"),
-        OrderStrategy.BOOKMARK_COUNT_ASC: (BookmarkCountCursor, "bookmark_count"),
-        OrderStrategy.BOOKMARK_COUNT_DESC: (BookmarkCountCursor, "bookmark_count"),
     }
 
     cursor_class, field_name = cursor_config[order_strategy]
     field_value = getattr(last_book, field_name)
     cursor_params = {field_name: field_value, "book_id": last_book.id}
     cursor_instance = cursor_class(**cursor_params)
+
+    return Cursor.encode(cursor_instance)
+
+
+def create_next_bookmark_cursor(
+    books_with_bookmark_count: list[tuple[Book, int]], has_next: bool
+) -> Optional[str]:
+    if not has_next or not books_with_bookmark_count:
+        return None
+
+    last_book = books_with_bookmark_count[-1][0]
+    last_bookmark_count = books_with_bookmark_count[-1][1]
+    cursor_params = {"bookmark_count": last_bookmark_count, "book_id": last_book.id}
+    cursor_instance = BookmarkCountCursor(**cursor_params)
 
     return Cursor.encode(cursor_instance)

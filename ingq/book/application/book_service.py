@@ -66,6 +66,18 @@ class BookService:
             cursor=cursor,
         )
 
+    def get_best_books(
+        self,
+        user_id: Optional[str],
+        limit: int,
+        cursor: Optional[str] = None,
+    ) -> PaginatedBookItem:
+        return self.book_repository.get_best_books(
+            user_id,
+            limit=limit,
+            cursor=cursor,
+        )
+
     def get_book_by_id_or_throw(self, book_id: int) -> Book:
         book = self.book_repository.find_by_id(book_id)
         if not book:
