@@ -113,13 +113,13 @@ class BookQueryBuilder:
                     )
                 )
         elif order_strategy == OrderStrategy.CREATED_AT_ASC:
-            query = query.order_by(asc(Book.created_at), asc(Book.id))
+            query = query.order_by(asc(Book.created_at), desc(Book.id))
             if cursor:
                 query = query.filter(
                     (Book.created_at > cursor.created_at)
                     | (
                         (Book.created_at == cursor.created_at)
-                        & (Book.id > cursor.book_id)
+                        & (Book.id < cursor.book_id)
                     )
                 )
         elif order_strategy == OrderStrategy.UPDATED_AT_DESC:
@@ -133,13 +133,13 @@ class BookQueryBuilder:
                     )
                 )
         elif order_strategy == OrderStrategy.UPDATED_AT_ASC:
-            query = query.order_by(asc(Book.updated_at), asc(Book.id))
+            query = query.order_by(asc(Book.updated_at), desc(Book.id))
             if cursor:
                 query = query.filter(
                     (Book.updated_at > cursor.updated_at)
                     | (
                         (Book.updated_at == cursor.updated_at)
-                        & (Book.id > cursor.book_id)
+                        & (Book.id < cursor.book_id)
                     )
                 )
 
