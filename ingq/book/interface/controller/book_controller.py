@@ -44,9 +44,9 @@ def get_all_books(
     Cursor 기반 페이지네이션을 적용해 전체 책 목록 조회
 
     - limit: 페이지당 항목 수(default = 4)
-    - order_strategy: 정렬 전략(생성일자, 업데이트일자, 북마크 기준 오름,내림 차순 제공)
-        - created_at_desc, updated_at_desc, bookmark_count_desc
-        - created_at_asc, updated_at_asc, bookmark_count_asc
+    - order_strategy: 정렬 전략(생성일자, 업데이트일자 기준 오름,내림 차순 제공)
+        - created_at_desc, updated_at_desc
+        - created_at_asc, updated_at_asc
     - cursor: 이전 페이지의 마지막 항목에 대한 커서(null 가능)
         - base64로 인코딩된 값
     """
@@ -73,9 +73,9 @@ def get_mybooks(
     Cursor 기반 페이지네이션을 적용해 내가 쓴 책 목록 조회
 
     - limit: 페이지당 항목 수(default = 4)
-    - order_strategy: 정렬 전략(생성일자, 업데이트일자, 북마크 기준 오름,내림 차순 제공)
-        - created_at_desc, updated_at_desc, bookmark_count_desc
-        - created_at_asc, updated_at_asc, bookmark_count_asc
+    - order_strategy: 정렬 전략(생성일자, 업데이트일자 기준 오름,내림 차순 제공)
+        - created_at_desc, updated_at_desc
+        - created_at_asc, updated_at_asc
     - cursor: 이전 페이지의 마지막 항목에 대한 커서(null 가능)
         - base64로 인코딩된 값
     - progress: 이야기 진행 여부
@@ -106,9 +106,9 @@ def get_bookmarked_books(
     Cursor 기반 페이지네이션을 적용해 내가 북마크한 책 목록 조회
 
     - limit: 페이지당 항목 수(default = 4)
-    - order_strategy: 정렬 전략(생성일자, 업데이트일자, 북마크 기준 오름,내림 차순 제공)
-        - created_at_desc, updated_at_desc, bookmark_count_desc
-        - created_at_asc, updated_at_asc, bookmark_count_asc
+    - order_strategy: 정렬 전략(생성일자, 업데이트일자 기준 오름,내림 차순 제공)
+        - created_at_desc, updated_at_desc
+        - created_at_asc, updated_at_asc
     - cursor: 이전 페이지의 마지막 항목에 대한 커서(null 가능)
         - base64로 인코딩된 값
     """
