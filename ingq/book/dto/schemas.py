@@ -94,6 +94,7 @@ class BookItem(BaseModel):
         default=None,
         description="로그인 완료된 사용자에게만 제공, 비로그인 시 미포함 필드",
     )
+    is_in_progress: Optional[bool] = None
     bookmark_count: Optional[int] = None
 
 
