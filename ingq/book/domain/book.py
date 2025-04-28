@@ -29,6 +29,8 @@ class Book:
         cls, user_id: str, request: CreateBookRequest, now: datetime
     ) -> Book:
         _character = Character(
+            grammatical_person=request.character.grammatical_person,
+            historical_background=request.character.historical_background,
             name=request.character.name,
             age=request.character.age,
             gender=request.character.gender,
