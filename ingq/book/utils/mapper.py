@@ -8,6 +8,8 @@ class BookMapper:
     @staticmethod
     def book_to_create_book_response(book: BookVO) -> CreateBookResponse:
         _character = CharacterResponse(
+            grammatical_person=book.character.grammatical_person,
+            historical_background=book.character.historical_background,
             name=book.character.name,
             age=book.character.age,
             gender=book.character.gender,
