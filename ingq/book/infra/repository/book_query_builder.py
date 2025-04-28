@@ -16,7 +16,7 @@ class BookQueryBuilder:
     @staticmethod
     def build_all_books_query(db: Session, user_id: Optional[str] = None) -> Query:
         if user_id:
-            return (
+            query = (
                 db.query(
                     Book, User.username, Bookmark.id.isnot(None).label("is_bookmarked")
                 )
@@ -26,8 +26,14 @@ class BookQueryBuilder:
                     (Bookmark.book_id == Book.id) & (Bookmark.user_id == user_id),
                 )
             )
+
         else:
-            return db.query(Book, User.username).join(User, Book.user_id == User.id)
+            query = db.query(Book, User.username).join(User, Book.user_id == User.id)
+
+        # 완성된 이야기만 필터링
+        query = query.filter(Book.is_in_progress.is_(False))
+
+        return query
 
     @staticmethod
     def build_mybooks_query(
@@ -69,7 +75,7 @@ class BookQueryBuilder:
         )
 
         if user_id:
-            return (
+            query = (
                 db.query(
                     Book,
                     User.username,
@@ -85,8 +91,9 @@ class BookQueryBuilder:
                 )
                 .outerjoin(bookmark_count, Book.id == bookmark_count.c.book_id)
             )
+
         else:
-            return (
+            query = (
                 db.query(
                     Book,
                     User.username,
@@ -97,6 +104,11 @@ class BookQueryBuilder:
                 .join(User, Book.user_id == User.id)
                 .outerjoin(bookmark_count, Book.id == bookmark_count.c.book_id)
             )
+
+        # 완성된 이야기만 필터링
+        query = query.filter(Book.is_in_progress.is_(False))
+
+        return query
 
     @staticmethod
     def apply_ordering_and_filtering(
