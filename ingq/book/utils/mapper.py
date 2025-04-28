@@ -104,6 +104,7 @@ class BookMapper:
                     author=username,
                     background=book.background,
                     is_bookmarked=is_bookmarked,
+                    is_in_progress=book.is_in_progress,
                 )
             )
         return result
