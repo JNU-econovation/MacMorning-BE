@@ -1,5 +1,3 @@
-from typing import Optional
-
 from book.domain.book import Book as BookVO
 from book.domain.character import Character as CharacterVO
 from book.dto.schemas import BookItem, CharacterResponse, CreateBookResponse
@@ -58,11 +56,11 @@ class BookMapper:
         )
 
     @staticmethod
-    def to_book_items_with_info(
-        books_with_info: list[tuple[Book, str, bool]],
+    def to_book_items_in_get_all_books_with_user_id(
+        books_with_username_and_is_bookmarked: list[tuple[Book, str, bool]],
     ) -> list[BookItem]:
         result = []
-        for book, username, is_bookmarked in books_with_info:
+        for book, username, is_bookmarked in books_with_username_and_is_bookmarked:
             result.append(
                 BookItem(
                     book_id=book.id,
@@ -76,9 +74,8 @@ class BookMapper:
         return result
 
     @staticmethod
-    def to_book_items_with_username(
+    def to_book_items_in_get_all_books(
         books_with_username: list[tuple[Book, str]],
-        force_bookmarked: Optional[bool] = None,
     ) -> list[BookItem]:
         result = []
         for book, username in books_with_username:
@@ -89,17 +86,59 @@ class BookMapper:
                     title=book.title,
                     author=username,
                     background=book.background,
-                    is_bookmarked=force_bookmarked if force_bookmarked else None,
                 )
             )
         return result
 
     @staticmethod
-    def to_book_items_with_info_and_bookmark_count(
-        books_with_info_and_count: list[tuple[Book, str, bool, int]],
+    def to_book_items_in_get_mybooks(
+        books_with_username_and_is_bookmarked: list[tuple[Book, str, bool]],
     ) -> list[BookItem]:
         result = []
-        for book, username, is_bookmarked, bookmark_count in books_with_info_and_count:
+        for book, username, is_bookmarked in books_with_username_and_is_bookmarked:
+            result.append(
+                BookItem(
+                    book_id=book.id,
+                    title_img_url="https://placehold.co/400",
+                    title=book.title,
+                    author=username,
+                    background=book.background,
+                    is_bookmarked=is_bookmarked,
+                )
+            )
+        return result
+
+    @staticmethod
+    def to_book_items_in_get_bookmarked_books(
+        books_with_username: list[tuple[Book, str]],
+    ) -> list[BookItem]:
+        result = []
+        for book, username in books_with_username:
+            result.append(
+                BookItem(
+                    book_id=book.id,
+                    title_img_url="https://placehold.co/400",
+                    title=book.title,
+                    author=username,
+                    background=book.background,
+                    is_bookmarked=True,
+                )
+            )
+        return result
+
+    @staticmethod
+    def to_book_items_in_get_best_books_with_user_id(
+        books_with_username_and_is_bookmarked_and_bookmark_count: list[
+            tuple[Book, str, bool, int]
+        ],
+    ) -> list[BookItem]:
+        result = []
+        for (
+            book,
+            username,
+            is_bookmarked,
+            bookmark_count,
+        ) in books_with_username_and_is_bookmarked_and_bookmark_count:
             result.append(
                 BookItem(
                     book_id=book.id,
@@ -114,11 +153,15 @@ class BookMapper:
         return result
 
     @staticmethod
-    def to_book_items_with_username_and_bookmark_count(
-        books_with_username_and_count: list[tuple[Book, str, int]],
+    def to_book_items_in_get_best_books(
+        books_with_username_and_bookmark_count: list[tuple[Book, str, int]],
     ) -> list[BookItem]:
         result = []
-        for book, username, bookmark_count in books_with_username_and_count:
+        for (
+            book,
+            username,
+            bookmark_count,
+        ) in books_with_username_and_bookmark_count:
             result.append(
                 BookItem(
                     book_id=book.id,

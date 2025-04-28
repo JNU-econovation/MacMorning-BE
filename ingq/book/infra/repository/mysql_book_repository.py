@@ -65,10 +65,12 @@ class MysqlBookRepository(BookRepository):
             books_to_return = books[:limit]
 
             if user_id:  # books: tuple[Book, str, bool] (Book, username, is_bookmarked)
-                book_items = BookMapper.to_book_items_with_info(books_to_return)
+                book_items = BookMapper.to_book_items_in_get_all_books_with_user_id(
+                    books_to_return
+                )
                 books = [book for book, _, _ in books_to_return]
             else:  # books: tuple[Book, str] (Book, username)
-                book_items = BookMapper.to_book_items_with_username(books_to_return)
+                book_items = BookMapper.to_book_items_in_get_all_books(books_to_return)
                 books = [book for book, _ in books_to_return]
 
             next_cursor = create_next_cursor(books, order_strategy, has_next)
@@ -102,7 +104,7 @@ class MysqlBookRepository(BookRepository):
             has_next = len(books) > limit
             books_to_return = books[:limit]
 
-            book_items = BookMapper.to_book_items_with_info(books_to_return)
+            book_items = BookMapper.to_book_items_in_get_mybooks(books_to_return)
 
             books = [book for book, _, _ in books_to_return]
             next_cursor = create_next_cursor(books, order_strategy, has_next)
@@ -135,8 +137,8 @@ class MysqlBookRepository(BookRepository):
             has_next = len(books) > limit
             books_to_return = books[:limit]
 
-            book_items = BookMapper.to_book_items_with_username(
-                books_to_return, force_bookmarked=True
+            book_items = BookMapper.to_book_items_in_get_bookmarked_books(
+                books_to_return
             )
 
             books = [book for book, _ in books_to_return]
@@ -167,7 +169,7 @@ class MysqlBookRepository(BookRepository):
             books_to_return = books[:limit]
 
             if user_id:  # books: tuple[Book, str, bool, int] (Book, username, is_bookmarked, bookmark_count)
-                book_items = BookMapper.to_book_items_with_info_and_bookmark_count(
+                book_items = BookMapper.to_book_items_in_get_best_books_with_user_id(
                     books_to_return
                 )
 
@@ -176,9 +178,7 @@ class MysqlBookRepository(BookRepository):
                     for book, _, _, bookmark_count in books_to_return
                 ]
             else:  # books: tuple[Book, str, int] (Book, username, bookmark_count)
-                book_items = BookMapper.to_book_items_with_username_and_bookmark_count(
-                    books_to_return
-                )
+                book_items = BookMapper.to_book_items_in_get_best_books(books_to_return)
                 books_with_bookmark_count = [
                     (book, bookmark_count)
                     for book, _, bookmark_count in books_to_return
