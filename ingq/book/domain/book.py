@@ -6,6 +6,9 @@ from typing import Optional
 
 from book.domain.character import Character
 from book.dto.schemas import CreateBookRequest
+from bookmark.exception.bookmark_exception import (
+    BookmarkNotAllowedForInProgressBookException,
+)
 
 
 @dataclass
@@ -43,3 +46,7 @@ class Book:
             created_at=now,
             updated_at=now,
         )
+
+    def validate_is_not_in_progress(self) -> None:
+        if self.is_in_progress:
+            raise BookmarkNotAllowedForInProgressBookException()

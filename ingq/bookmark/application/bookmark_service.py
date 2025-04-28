@@ -22,7 +22,8 @@ class BookmarkService:
         self, user_id: str, bookmark_request: BookmarkRequest
     ) -> BookmarkResponse:
         book_id = bookmark_request.book_id
-        self.book_service.get_book_by_id_or_throw(book_id)
+        book = self.book_service.get_book_by_id_or_throw(book_id)
+        book.validate_is_not_in_progress()
         bookmark = self.bookmark_repository.find_by_user_id_and_book_id(
             user_id, book_id
         )
