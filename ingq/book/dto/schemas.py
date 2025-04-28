@@ -7,6 +7,14 @@ from pydantic import BaseModel, Field, field_validator
 # ============================================================================
 # Book 생성 관련 DTO
 class Character(BaseModel):
+    grammatical_person: Optional[Literal["1인칭", "3인칭"]] = Field(
+        default=None, description="주인공 시점(1인칭 또는 3인칭)"
+    )
+
+    historical_background: Optional[str] = Field(
+        default=None, max_length=100, description="주인공 시대적 배경 (최대 100자)"
+    )
+
     name: Optional[str] = Field(
         default=None, max_length=10, description="주인공 이름 (최대 10자)"
     )
