@@ -27,6 +27,7 @@ class StoryService:
     def create_story_with_illust_and_choice(
         self,
         user_id: str,
+        book_id: int,
         create_story_with_illust_and_choice_request: CreateStoryWithIllustAndChoiceRequest,
         session: Session,
     ) -> CreateStoryWithIllustAndChoiceResponse:
@@ -34,7 +35,7 @@ class StoryService:
         with session.begin():
             story = Story(
                 id=None,
-                book_id=create_story_with_illust_and_choice_request.story.book_id,
+                book_id=book_id,
                 page_number=create_story_with_illust_and_choice_request.story.page_number,
                 story_text=create_story_with_illust_and_choice_request.story.story_text,
                 created_at=now,

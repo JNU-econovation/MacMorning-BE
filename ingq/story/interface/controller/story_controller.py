@@ -13,15 +13,16 @@ from story.dto.schemas import (
 router = APIRouter(prefix="/v1", tags=["Story Router"])
 
 
-@router.post("/story", status_code=201)
+@router.post("/book/{book_id}/story", status_code=201)
 @inject
 def create_story(
     request: Request,
+    book_id: int,
     create_story_with_illust_and_choice_request: CreateStoryWithIllustAndChoiceRequest,
     story_service: StoryService = Depends(Provide[Container.story_service]),
     session: Session = Depends(get_db),
 ) -> CreateStoryWithIllustAndChoiceResponse:
     current_user = request.state.current_user
     return story_service.create_story_with_illust_and_choice(
-        current_user.id, create_story_with_illust_and_choice_request, session
+        current_user.id, book_id, create_story_with_illust_and_choice_request, session
     )

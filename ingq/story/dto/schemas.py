@@ -10,7 +10,6 @@ from illust.dto.schemas import CreateIllustRequest, CreateIllustResponse
 # ============================================================================
 # Story 생성 관련 DTO
 class CreateStoryRequest(BaseModel):
-    book_id: int = Field(..., description="책 ID")
     page_number: int = Field(..., description="책 페이지")
     story_text: str = Field(..., description="이야기")
 
