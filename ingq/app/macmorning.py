@@ -12,6 +12,7 @@ from core.exception.error_handler import register_exception_handlers
 from core.response.api_response_wrapper import ApiResponseWrapper
 from db.redis_cache import redis_cache
 from dependencies.containers import Container
+from story.interface.controller.story_controller import router as story_router
 
 
 @asynccontextmanager
@@ -28,6 +29,7 @@ def create_app() -> FastAPI:
             "auth.interface.controller.auth_controller",
             "book.interface.controller.book_controller",
             "bookmark.interface.controller.bookmark_controller",
+            "story.interface.controller.story_controller",
         ]
     )
     app = FastAPI(lifespan=lifespan, default_response_class=ApiResponseWrapper)
@@ -53,6 +55,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(book_router)
     app.include_router(bookmark_router)
+    app.include_router(story_router)
 
     app.openapi = lambda: custom_openapi(app, exempt_paths)
 
