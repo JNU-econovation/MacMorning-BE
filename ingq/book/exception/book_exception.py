@@ -3,6 +3,10 @@ from fastapi import status
 from core.exception.custom_exception import BusinessException, ValueException
 
 
+class BookException(BusinessException):
+    pass
+
+
 # ValueException
 class InvalidCursorException(ValueException):
     def __init__(self, detail="정렬 전략과 커서 값이 일치하지 않습니다."):
@@ -19,7 +23,7 @@ class UnsupportedStrategyException(ValueException):
 
 
 # BusinessException
-class BookNotFoundException(BusinessException):
+class BookNotFoundException(BookException):
     def __init__(self):
         super().__init__(
             code="BOOK001",

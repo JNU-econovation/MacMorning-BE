@@ -3,7 +3,11 @@ from fastapi import status
 from core.exception.custom_exception import BusinessException
 
 
-class UserNotFoundException(BusinessException):
+class UserException(BusinessException):
+    pass
+
+
+class UserNotFoundException(UserException):
     def __init__(self):
         super().__init__(
             code="USER001",
@@ -12,7 +16,7 @@ class UserNotFoundException(BusinessException):
         )
 
 
-class InvalidCredentialsException(BusinessException):
+class InvalidCredentialsException(UserException):
     def __init__(self):
         super().__init__(
             code="USER002",
@@ -21,7 +25,7 @@ class InvalidCredentialsException(BusinessException):
         )
 
 
-class UserAlreadyExistsException(BusinessException):
+class UserAlreadyExistsException(UserException):
     def __init__(self):
         super().__init__(
             code="USER003",
