@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from illust.domain.illust import Illust
 from illust.domain.repository.illust_repository import IllustRepository
 from illust.dto.schemas import CreateIllustRequest, CreateIllustResponse
+from illust.utils.mapper import IllustMapper
 
 
 class IllustService:
@@ -18,19 +19,9 @@ class IllustService:
         session: Session,
     ) -> CreateIllustResponse:
         now = datetime.now(timezone.utc)
-        illust = Illust(
-            id=None,
-            story_id=story_id,
-            image_url=create_illust_request.image_url,
-            created_at=now,
-            updated_at=now,
+        illust = Illust.create_illust_request_to_illust(
+            story_id, create_illust_request, now
         )
         saved_illust = self.illust_repository.save(illust, db=session)
 
-        return CreateIllustResponse(
-            illust_id=saved_illust.id,
-            story_id=saved_illust.story_id,
-            image_url=saved_illust.image_url,
-            created_at=saved_illust.created_at,
-            updated_at=saved_illust.updated_at,
-        )
+        return IllustMapper.to_create_illust_response(saved_illust)
