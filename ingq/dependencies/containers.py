@@ -73,4 +73,5 @@ class Container(containers.DeclarativeContainer):
         story_repository=story_repository,
         illust_service=illust_service,
         choice_service=choice_service,
+        book_service=book_service,
     )
