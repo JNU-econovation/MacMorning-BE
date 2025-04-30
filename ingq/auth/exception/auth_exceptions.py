@@ -3,7 +3,11 @@ from fastapi import status
 from core.exception.custom_exception import BusinessException
 
 
-class JwtTokenValidationException(BusinessException):
+class AuthException(BusinessException):
+    pass
+
+
+class JwtTokenValidationException(AuthException):
     def __init__(self):
         super().__init__(
             code="JWT001",
@@ -12,7 +16,7 @@ class JwtTokenValidationException(BusinessException):
         )
 
 
-class RefreshTokenNotFoundException(BusinessException):
+class RefreshTokenNotFoundException(AuthException):
     def __init__(self):
         super().__init__(
             code="REF001",
@@ -21,7 +25,7 @@ class RefreshTokenNotFoundException(BusinessException):
         )
 
 
-class InvalidTokenFormatException(BusinessException):
+class InvalidTokenFormatException(AuthException):
     def __init__(self):
         super().__init__(
             code="JWT002",

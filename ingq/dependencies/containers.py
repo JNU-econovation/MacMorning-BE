@@ -10,6 +10,12 @@ from book.application.book_service import BookService
 from book.infra.repository.mysql_book_repository import MysqlBookRepository
 from bookmark.application.bookmark_service import BookmarkService
 from bookmark.infra.repository.mysql_bookmark_repository import MysqlBookmarkRepository
+from choice.application.choice_service import ChoiceService
+from choice.infra.repository.mysql_choice_repository import MysqlChoiceRepository
+from illust.application.illust_service import IllustService
+from illust.infra.repository.mysql_illust_repository import MysqlIllustRepository
+from story.application.story_service import StoryService
+from story.infra.repository.mysql_story_repository import MysqlStoryRepository
 from user.application.user_service import UserService
 from user.application.user_validator import UserValidator
 from user.infra.repository.user_repository_impl import UserRepositoryImpl
@@ -17,7 +23,7 @@ from user.infra.repository.user_repository_impl import UserRepositoryImpl
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
-        packages=["user", "auth", "book", "bookmark"],
+        packages=["user", "auth", "book", "bookmark", "story", "choice", "illust"],
     )
 
     user_repository = providers.Factory(UserRepositoryImpl)
@@ -48,5 +54,24 @@ class Container(containers.DeclarativeContainer):
     bookmark_service = providers.Factory(
         BookmarkService,
         bookmark_repository=bookmark_repository,
+        book_service=book_service,
+    )
+
+    illust_repository = providers.Factory(MysqlIllustRepository)
+    illust_service = providers.Factory(
+        IllustService, illust_repository=illust_repository
+    )
+
+    choice_repository = providers.Factory(MysqlChoiceRepository)
+    choice_service = providers.Factory(
+        ChoiceService, choice_repository=choice_repository
+    )
+
+    story_repository = providers.Factory(MysqlStoryRepository)
+    story_service = providers.Factory(
+        StoryService,
+        story_repository=story_repository,
+        illust_service=illust_service,
+        choice_service=choice_service,
         book_service=book_service,
     )
