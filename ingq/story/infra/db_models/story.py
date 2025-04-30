@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, Integer, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.database import Base
@@ -36,6 +36,9 @@ class Story(Base):
     choice = relationship(
         "Choice",
         back_populates="story",
+        uselist=False,
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
+
+    __table_args__ = (UniqueConstraint("book_id", "page_number", name="_book_page_uc"),)
