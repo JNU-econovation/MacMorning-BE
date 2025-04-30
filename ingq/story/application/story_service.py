@@ -59,8 +59,9 @@ class StoryService:
                 book, saved_story.id, choice_request, session
             )
 
-            if choice_request is None:
+            if saved_choice is None:
                 book.set_is_in_progress_to_false()
+                self.book_service.set_is_in_progress_to_false(book, session)
 
         return CreateStoryWithIllustAndChoiceResponse(
             story=StoryMapper.to_create_story_response(saved_story),
