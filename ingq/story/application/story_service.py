@@ -59,7 +59,6 @@ class StoryService:
             )
 
             if saved_choice is None:
-                book.set_is_in_progress_to_false()
                 self.book_service.set_is_in_progress_to_false(book, session)
 
         return CreateStoryWithIllustAndChoiceResponse(
