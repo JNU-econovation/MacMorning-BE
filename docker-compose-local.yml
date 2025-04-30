@@ -55,7 +55,9 @@ services:
         condition: service_healthy
     restart: always
     command: >
-      sh -c "uv sync --frozen --no-cache && uv run uvicorn main:app --port 8000 --host 0.0.0.0 --reload"
+      sh -c "uv sync --frozen --no-cache &&
+       /ingq/.venv/bin/alembic upgrade head &&
+        uv run uvicorn main:app --port 8000 --host 0.0.0.0 --reload --lifespan=on"
 
   ingq-ai:
     build:
