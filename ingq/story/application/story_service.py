@@ -9,7 +9,6 @@ from illust.application.illust_service import IllustService
 from story.domain.repository.story_repository import StoryRepository
 from story.domain.story import Story
 from story.dto.schemas import (
-    CreateStoryRequest,
     CreateStoryWithIllustAndChoiceRequest,
     CreateStoryWithIllustAndChoiceResponse,
 )
