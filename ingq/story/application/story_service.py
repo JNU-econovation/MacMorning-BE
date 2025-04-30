@@ -9,7 +9,6 @@ from illust.application.illust_service import IllustService
 from story.domain.repository.story_repository import StoryRepository
 from story.domain.story import Story
 from story.dto.schemas import (
-    CreateStoryResponse,
     CreateStoryWithIllustAndChoiceRequest,
     CreateStoryWithIllustAndChoiceResponse,
 )
@@ -19,6 +18,7 @@ from story.exception.story_exception import (
     InvalidChoiceException,
     InvalidUserAccessException,
 )
+from story.utils.mapper import StoryMapper
 
 
 class StoryService:
@@ -61,14 +61,7 @@ class StoryService:
             if not book.is_in_progress:
                 raise InvalidBookProgressException()
 
-            story = Story(
-                id=None,
-                book_id=book_id,
-                page_number=story_request.page_number,
-                story_text=story_request.story_text,
-                created_at=now,
-                updated_at=now,
-            )
+            story = Story.create_story_request_to_story(book_id, story_request, now)
             saved_story = self.story_repository.save(story, db=session)
 
             saved_illust = None
@@ -97,14 +90,7 @@ class StoryService:
                 book.set_is_in_progress_to_false()
 
         return CreateStoryWithIllustAndChoiceResponse(
-            story=CreateStoryResponse(
-                story_id=saved_story.id,
-                book_id=saved_story.book_id,
-                page_number=saved_story.page_number,
-                story_text=saved_story.story_text,
-                created_at=saved_story.created_at,
-                updated_at=saved_story.updated_at,
-            ),
+            story=StoryMapper.to_create_story_response(saved_story),
             illust=saved_illust,
             choice=saved_choice,
         )
