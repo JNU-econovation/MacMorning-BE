@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.database import Base
@@ -33,3 +33,5 @@ class Choice(Base):
     )
 
     story = relationship("Story", back_populates="choice")
+
+    __table_args__ = (CheckConstraint("my_choice IN (1, 2, 3)", name="_my_choice_ck"),)
