@@ -38,6 +38,6 @@ class InvalidUserAccessException(StoryException):
     def __init__(self):
         super().__init__(
             code="STORY004",
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="해당 책에 대한 접근 권한이 없습니다.",
         )
