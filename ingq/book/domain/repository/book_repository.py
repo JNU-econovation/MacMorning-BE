@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import Optional
 
+from sqlalchemy.orm import Session
+
 from book.domain.book import Book
 from book.dto.schemas import PaginatedBookItem
 from book.infra.pagination.order_strategy import OrderStrategy
@@ -53,4 +55,8 @@ class BookRepository(metaclass=ABCMeta):
 
     @abstractmethod
     def find_by_id(self, book_id: int) -> Optional[Book]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_is_in_progress_to_false(self, book: Book, db: Session) -> Book:
         raise NotImplementedError
