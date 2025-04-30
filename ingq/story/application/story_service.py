@@ -9,6 +9,7 @@ from illust.application.illust_service import IllustService
 from story.domain.repository.story_repository import StoryRepository
 from story.domain.story import Story
 from story.dto.schemas import (
+    CreateStoryRequest,
     CreateStoryWithIllustAndChoiceRequest,
     CreateStoryWithIllustAndChoiceResponse,
 )
@@ -47,46 +48,18 @@ class StoryService:
             illust_request = create_story_with_illust_and_choice_request.illust
             choice_request = create_story_with_illust_and_choice_request.choice
 
-            book = self.book_service.get_book_by_id_or_throw(book_id)
-
-            if book.user_id != user_id:
-                raise InvalidUserAccessException()
-
-            existing_story = self.get_story_by_book_id_and_page_number(
-                book_id, story_request.page_number
-            )
-            if existing_story:
-                raise DuplicatePageNumberException()
-
-            if not book.is_in_progress:
-                raise InvalidBookProgressException()
+            book = self._validate_and_get_book(user_id, book_id, story_request)
 
             story = Story.create_story_request_to_story(book_id, story_request, now)
             saved_story = self.story_repository.save(story, db=session)
 
-            saved_illust = None
-            saved_choice = None
+            saved_illust = self._create_illust(saved_story.id, illust_request, session)
 
-            if illust_request:
-                saved_illust = self.illust_service.create_illust(
-                    saved_story.id,
-                    illust_request,
-                    session,
-                )
+            saved_choice = self._create_choice(
+                book, saved_story.id, choice_request, session
+            )
 
-            if choice_request:
-                if book.gamemode:
-                    pass
-                else:
-                    if not choice_request.is_success:
-                        raise InvalidChoiceException()
-
-                saved_choice = self.choice_service.create_choice(
-                    saved_story.id,
-                    choice_request,
-                    session,
-                )
-            else:
+            if choice_request is None:
                 book.set_is_in_progress_to_false()
 
         return CreateStoryWithIllustAndChoiceResponse(
@@ -101,3 +74,31 @@ class StoryService:
         return self.story_repository.find_by_book_id_and_page_number(
             book_id, page_number
         )
+
+    def _validate_and_get_book(self, user_id, book_id, story_request):
+        book = self.book_service.get_book_by_id_or_throw(book_id)
+
+        if book.user_id != user_id:
+            raise InvalidUserAccessException()
+
+        if self.get_story_by_book_id_and_page_number(
+            book_id, story_request.page_number
+        ):
+            raise DuplicatePageNumberException()
+
+        if not book.is_in_progress:
+            raise InvalidBookProgressException()
+
+        return book
+
+    def _create_illust(self, story_id, illust_request, session):
+        if illust_request:
+            return self.illust_service.create_illust(story_id, illust_request, session)
+        return None
+
+    def _create_choice(self, book, story_id, choice_request, session):
+        if choice_request:
+            if not book.gamemode and not choice_request.is_success:
+                raise InvalidChoiceException()
+            return self.choice_service.create_choice(story_id, choice_request, session)
+        return None
