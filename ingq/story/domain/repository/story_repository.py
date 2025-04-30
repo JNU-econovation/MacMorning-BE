@@ -13,6 +13,6 @@ class StoryRepository(metaclass=ABCMeta):
 
     @abstractmethod
     def find_by_book_id_and_page_number(
-        self, book_id: int, page_number: int, db: Session
+        self, book_id: int, page_number: int
     ) -> Optional[Story]:
         raise NotImplementedError
