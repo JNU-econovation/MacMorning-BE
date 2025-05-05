@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Request
 
 from book.application.book_service import BookService
 from dependencies.containers import Container
+from story.exception.story_exception import InvalidUserAccessException
 from upload_image.application.file_service import FileService
 from upload_image.application.s3_service import S3Service
 from upload_image.dto.schemas import UploadImageRequest, UploadImageResponse
@@ -25,7 +26,7 @@ def upload_image(
     book = book_service.get_book_by_id_or_throw(book_id)
 
     if book.user_id != user_id:
-        raise Exception("Invalid user access")
+        raise InvalidUserAccessException()
 
     original_filename = upload_image_request.filename
     content_type = file_service.get_content_type(original_filename)
