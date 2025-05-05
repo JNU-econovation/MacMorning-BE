@@ -2,7 +2,8 @@ import mimetypes
 import os
 
 import ulid
-from fastapi import HTTPException
+
+from upload_image.exception.file_exception import InvalidExtTypeException
 
 
 class FileService:
@@ -23,7 +24,7 @@ class FileService:
         }
 
         if ext not in content_type_map:
-            raise HTTPException(status_code=400, detail="Invalid file type")
+            raise InvalidExtTypeException()
 
         return content_type_map.get(ext)
 
