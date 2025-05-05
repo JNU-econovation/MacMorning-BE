@@ -1,6 +1,5 @@
 import mimetypes
 import os
-import re
 
 import ulid
 
