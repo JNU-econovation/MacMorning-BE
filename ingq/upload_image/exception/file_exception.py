@@ -14,3 +14,21 @@ class InvalidExtTypeException(FileException):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="지원하지 않는 파일 확장자 입니다.",
         )
+
+
+class InvalidFilenameLengthException(FileException):
+    def __init__(self):
+        super().__init__(
+            code="FILE002",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="파일 이름은 50자 이하로 입력해주세요.",
+        )
+
+
+class InvalidFilenameCharacterException(FileException):
+    def __init__(self):
+        super().__init__(
+            code="FILE003",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="파일 이름은 영문자, 숫자, 특수문자(_ . -)만 사용할 수 있습니다.",
+        )
