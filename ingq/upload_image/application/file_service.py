@@ -1,9 +1,14 @@
 import mimetypes
 import os
+import re
 
 import ulid
 
-from upload_image.exception.file_exception import InvalidExtTypeException
+from upload_image.exception.file_exception import (
+    InvalidExtTypeException,
+    InvalidFilenameCharacterException,
+    InvalidFilenameLengthException,
+)
 
 
 class FileService:
@@ -30,4 +35,10 @@ class FileService:
 
     @staticmethod
     def generate_unique_filename(original_filename: str) -> str:
+        if len(original_filename) > 50:
+            raise InvalidFilenameLengthException()
+
+        if not all(c.isalnum() or c in "_.-" for c in original_filename):
+            raise InvalidFilenameCharacterException()
+
         return f"{ulid.ULID().generate()}_{original_filename}"
