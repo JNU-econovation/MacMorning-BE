@@ -12,7 +12,7 @@ class InvalidExtTypeException(FileException):
         super().__init__(
             code="FILE001",
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="지원하지 않는 파일 확장자 입니다.",
+            detail="지원하지 않는 파일 확장자 입니다.(png, jpg, jpeg, gif, webp) 중 하나를 사용해주세요.",
         )
 
 
