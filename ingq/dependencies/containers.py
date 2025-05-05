@@ -16,6 +16,8 @@ from illust.application.illust_service import IllustService
 from illust.infra.repository.mysql_illust_repository import MysqlIllustRepository
 from story.application.story_service import StoryService
 from story.infra.repository.mysql_story_repository import MysqlStoryRepository
+from upload_image.application.file_service import FileService
+from upload_image.application.s3_service import S3Service
 from user.application.user_service import UserService
 from user.application.user_validator import UserValidator
 from user.infra.repository.user_repository_impl import UserRepositoryImpl
@@ -23,7 +25,16 @@ from user.infra.repository.user_repository_impl import UserRepositoryImpl
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
-        packages=["user", "auth", "book", "bookmark", "story", "choice", "illust"],
+        packages=[
+            "user",
+            "auth",
+            "book",
+            "bookmark",
+            "story",
+            "choice",
+            "illust",
+            "upload_image",
+        ],
     )
 
     user_repository = providers.Factory(UserRepositoryImpl)
@@ -75,3 +86,6 @@ class Container(containers.DeclarativeContainer):
         choice_service=choice_service,
         book_service=book_service,
     )
+
+    s3_service = providers.Singleton(S3Service)
+    file_service = providers.Singleton(FileService)
