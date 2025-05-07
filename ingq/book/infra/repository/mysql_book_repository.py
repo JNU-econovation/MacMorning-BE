@@ -1,5 +1,7 @@
 from typing import Optional
 
+from sqlalchemy.orm import Session
+
 from book.domain.book import Book as BookVO
 from book.domain.repository.book_repository import BookRepository
 from book.dto.schemas import (
@@ -40,6 +42,12 @@ class MysqlBookRepository(BookRepository):
                 return None
 
             return BookMapper.book_to_bookvo(book)
+
+    def update_is_in_progress_to_false(self, book: BookVO, db: Session) -> BookVO:
+        existing_book = db.query(Book).filter(Book.id == book.id).first()
+        existing_book.is_in_progress = book.is_in_progress
+        existing_book.updated_at = book.updated_at
+        return BookMapper.book_to_bookvo(existing_book)
 
     def get_all_books(
         self,

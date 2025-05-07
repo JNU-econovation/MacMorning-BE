@@ -52,3 +52,6 @@ class Book:
     def validate_is_not_in_progress(self) -> None:
         if self.is_in_progress:
             raise BookmarkNotAllowedForInProgressBookException()
+
+    def set_is_in_progress_to_false(self) -> None:
+        self.is_in_progress = False

@@ -28,6 +28,7 @@ class BookMapper:
             updated_at=book.updated_at,
         )
 
+    # Infra 계층에서 사용하는 메서드
     @staticmethod
     def bookvo_to_book(book: BookVO) -> Book:
         return Book(

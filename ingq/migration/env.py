@@ -22,6 +22,9 @@ def load_all_models():
     importlib.import_module("user.infra.db_models.user")
     importlib.import_module("book.infra.db_models.book")
     importlib.import_module("bookmark.infra.db_models.bookmark")
+    importlib.import_module("story.infra.db_models.story")
+    importlib.import_module("illust.infra.db_models.illust")
+    importlib.import_module("choice.infra.db_models.choice")
 
 
 # 모델 로드 실행

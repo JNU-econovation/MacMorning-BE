@@ -33,3 +33,12 @@ ALGORITHM = os.getenv("ALGORITHM")
 
 # Crypto(ingq/user/utils/crypto.py)
 ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
+
+# AWS S3 Setting
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION")
+AWS_S3_BUCKET_NAME = os.getenv("AWS_S3_BUCKET_NAME")
+
+# CloudFront Domain
+CLOUDFRONT_DOMAIN = os.getenv("CLOUDFRONT_DOMAIN")
