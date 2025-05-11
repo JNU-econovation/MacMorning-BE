@@ -18,7 +18,7 @@ def story(book_id: int, choice: int = Body(None), authorization: str = Header(..
         else:
             raise HTTPException(status_code=404,detail="데이터가 없습니다.")
     except Exception as e:
-        raise HTTPException(status_code=500,detail=f"책 조회 실패: {str(e)}")
+        raise HTTPException(status_code=500,detail=f"책 조회 실패: {e}") from e
 
 @app.post("/v1/story/{book_id}/image/{page_number}")
 def image(book_id: int,page_number: int, authorization: str = Header(None)):
