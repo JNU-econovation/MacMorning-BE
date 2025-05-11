@@ -77,7 +77,7 @@ class AiService:
 
                 #FAISS 벡터스토어를 사용하여 문서의 임베딩을 저장
                 #DistanceStrategy.COSINE은 유사도 측정기준을 코사인으로 함.
-                vectorstore = FAISS.from_documents(
+                self.vectorstore = FAISS.from_documents(
                     split_docs,
                     embedding=self.embedding_model,
                     distance_strategy=DistanceStrategy.COSINE
@@ -87,14 +87,15 @@ class AiService:
 
             #가장 유사도가 높은 문장 k개를 추출
             #lamda_mult는 유사도와 다양성 사이에 적용될 수준. 0에 가까울수록 다양성 우선, 1에 가까울수록 유사도 우선.
-            retriever = vectorstore.as_retriever(
+            if self.vectorstore is None:
+                raise HTTPException(status_code=500, detail="Vectorstore가 초기화되지 않았습니다.")
+            retriever = self.vectorstore.as_retriever(
                 search_type='mmr',
                 search_kwargs={'k': 5, 'lambda_mult': 0.15}
             )
 
             #검색 쿼리 - 실제로 이야기의 다음 내용을 이어가는게 아닌, 이야기의 다음 내용을 풀어나가기 위해 필요한 내용을 찾아서 반환하는 과정입니다. story_prompt랑 다름!
-            query = """
-            내 선택 : {choice} """
+            query = f"내 선택 : {choice}"
 
             relevant_docs = retriever.get_relevant_documents(query)
             sorted_docs = sorted(relevant_docs, key=lambda x: x.metadata.get('chunk_id', 0))
@@ -168,6 +169,8 @@ class AiService:
                     }
                 except Exception as e:
                     print(f"Presigned URL 처리 중 오류 발생: {str(e)}")
+                    if os.path.exists(filename) :
+                        os.remove(filename)
                     return {
                         "content_type": "image/png",
                         "local_path": filename,
