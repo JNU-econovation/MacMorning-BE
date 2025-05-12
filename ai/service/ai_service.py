@@ -21,7 +21,7 @@ class AiService:
         if not self.openai_api_key:
             raise HTTPException(status_code=500, detail="OPEN API키를 찾을 수 없습니다.")
             
-        # 모델 초기화
+        # 이야기 생성용 모델 초기화
         self.llm = ChatOpenAI(
             model_name=model_name, 
             temperature=temperature, 
@@ -32,15 +32,17 @@ class AiService:
             openai_api_key=self.openai_api_key
         )
 
-        self.openai_client = OpenAI(api_key=self.openai_api_key)
-        
         self.text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
             chunk_size=100,
             chunk_overlap=30,
             encoding_name='cl100k_base'
         )
+
+        #이미지 생성용 모델 초기화
+        self.openai_client = OpenAI(api_key=self.openai_api_key)
         
-        # 프롬프트 템플릿 초기화
+        
+        #이야기 생성 프롬프트 템플릿 초기화
         self.story_prompt = PromptTemplate(
             input_variables=["genre", "character", "story", "background", "choice"],
             template="""
@@ -54,8 +56,20 @@ class AiService:
             이때 마지막 문장과 선택지가 이야기처럼 자연스럽게 이어질 수 있도록 해 주세요.
             """
         )
-        
         self.story_chain = self.story_prompt | self.llm | StrOutputParser()
+
+        #시놉시스 생성 프롬프트 템플릿 초기화
+        self.synopsys_prompt = PromptTemplate(
+            input_variables=["genre", "character", "background"],
+            template="""
+            이야기의 배경: {background}
+            주인공 및 이야기 설정 : {character}
+            장르 : {genre}
+            
+            주어진 배경, 주인공 및 이야기 세부설정으로 해당 장르의 간단한 동화 시놉시스를 만들어줘.
+            """
+        )
+        self.synopsys_chain = self.synopsys_prompt | self.llm | StrOutputParser()
 
         #벡터 스토어 캐시
         self.vectorstore = None
@@ -114,6 +128,23 @@ class AiService:
             }
         except Exception as e:
             print(f"이야기 생성 중 오류가 발생했습니다: {str(e)}")
+            return {
+                "story": None,
+                "error": str(e)
+            }
+        
+    def generate_synopsys(self, genre="", character="", background=""):
+        try:
+            synopsys = self.synopsys_chain.invoke({
+                "genre" : genre,
+                "character": character,
+                "background": background, })
+
+            return {
+                "synopsys": synopsys,
+            }
+        except Exception as e:
+            print(f"시놉시스 생성 중 오류가 발생했습니다: {str(e)}")
             return {
                 "story": None,
                 "error": str(e)

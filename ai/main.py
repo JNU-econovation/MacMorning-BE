@@ -4,6 +4,20 @@ from client.book_client import get_story, get_book, get_all_story
 
 app = FastAPI()
 ai = AiService()
+
+@app.post("/v1/book/{book_id}")
+def synopsys(book_id: int, authorization: str = Header(None)):
+    try:
+        content = get_book(book_id, authorization)
+        if content:
+            content = content
+            result = ai.generate_synopsys(book_id, authorization,content)
+            return {"status": "success", "result":result}
+        else:
+            raise HTTPException(status_code=404,detail="데이터가 없습니다.")
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=f"DB 연결 실패: {str(e)}")
+
 @app.post("/v1/book/{book_id}/story")
 def story(book_id: int, choice: int = Body(None), authorization: str = Header(...)):
     try:
