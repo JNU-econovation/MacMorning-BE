@@ -8,10 +8,12 @@ ai = AiService()
 @app.post("/v1/book/{book_id}")
 def synopsys(book_id: int, authorization: str = Header(None)):
     try:
-        content = get_book(book_id, authorization)
-        if content:
-            content = content
-            result = ai.generate_synopsys(book_id, authorization,content)
+        book_info = get_book(book_id, authorization)
+        if book_info :
+            genre = book_info.get("genre")
+            character = book_info.get("character")
+            background = book_info.get("background")
+            result = ai.generate_synopsys(genre, character, background)
             return {"status": "success", "result":result}
         else:
             raise HTTPException(status_code=404,detail="데이터가 없습니다.")
