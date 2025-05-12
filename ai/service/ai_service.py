@@ -146,7 +146,7 @@ class AiService:
         except Exception as e:
             print(f"시놉시스 생성 중 오류가 발생했습니다: {str(e)}")
             return {
-                "story": None,
+                "synopsys": None,
                 "error": str(e)
             }
 
