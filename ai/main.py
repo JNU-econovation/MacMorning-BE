@@ -14,11 +14,28 @@ def synopsys(book_id: int, authorization: str = Header(None)):
             character = book_info.get("character")
             background = book_info.get("background")
             result = ai.generate_synopsys(genre, character, background)
-            return {"status": "success", "result":result}
+            return {"success": True, "data": result, "error": None}
         else:
-            raise HTTPException(status_code=404,detail="데이터가 없습니다.")
+            return {
+                "success": False, 
+                "data": None, 
+                "error": {
+                    "code": "BOOK001", 
+                    "status": 404, 
+                    "message": "데이터가 없습니다."
+                }
+            }
     except Exception as e:
-        raise HTTPException(status_code=500,detail=f"DB 연결 실패: {str(e)}")
+        return {
+            "success": False, 
+            "data": None, 
+            "error": {
+                "code": "DB001", 
+                "status": 500, 
+                "message": "DB 연결 실패", 
+                "error": str(e)
+            }
+        }
 
 @app.post("/v1/book/{book_id}/story")
 def story(book_id: int, choice: int = Body(None), authorization: str = Header(...)):
@@ -41,7 +58,6 @@ def image(book_id: int,page_number: int, authorization: str = Header(None)):
     try:
         content = get_story(book_id, page_number, authorization)
         if content:
-            content = content
             result = ai.generate_image(book_id,page_number,authorization,content)
             return {"status": "success", "result":result}
         else:
