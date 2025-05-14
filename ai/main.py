@@ -38,7 +38,7 @@ def synopsys(book_id: int, authorization: str = Header(None)):
         }
 
 @app.post("/v1/book/{book_id}/story")
-def story(book_id: int, choice: int = Body(None), authorization: str = Header(...)):
+def story(book_id: int, choice: str = Body(None), authorization: str = Header(...)):
     try:
         book_info = get_book(book_id, authorization)
         story = get_all_story(book_id, authorization)
