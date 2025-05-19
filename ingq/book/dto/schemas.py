@@ -19,14 +19,16 @@ class Character(BaseModel):
         default=None, max_length=10, description="주인공 이름 (최대 10자)"
     )
 
-    age: Optional[int] = Field(default=None, ge=0, description="주인공 나이 (0 이상)")
+    age: Optional[Literal["어린이", "청소년", "청년", "노인"]] = Field(
+        default=None, description="주인공 연령층 ('어린이', '청소년', '청년', '노인')"
+    )
 
     gender: Optional[Literal["남성", "여성"]] = Field(
         default=None, description="주인공 성별 ('남성' 또는 '여성')"
     )
 
-    characteristic: Optional[list[str]] = Field(
-        default_factory=list, description="주인공 특징"
+    characteristic: Optional[str] = Field(
+        default=None, max_length=100, description="주인공 특징 (최대 100자)"
     )
 
 
