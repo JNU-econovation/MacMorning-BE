@@ -6,6 +6,6 @@ class Character:
     grammatical_person: str
     historical_background: str
     name: str
-    age: int
+    age: str
     gender: str
-    characteristic: list[str]
+    characteristic: str
