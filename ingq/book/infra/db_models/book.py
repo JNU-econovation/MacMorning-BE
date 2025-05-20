@@ -17,6 +17,7 @@ class Book(Base):
     gamemode: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     character: Mapped[dict] = mapped_column(JSON, nullable=False)
     title: Mapped[str] = mapped_column(String(30), nullable=False)
+    title_img: Mapped[str] = mapped_column(String(255), nullable=False)
     background: Mapped[str] = mapped_column(String(100), nullable=False)
     is_in_progress: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(

@@ -2,6 +2,7 @@ from book.domain.book import Book as BookVO
 from book.domain.character import Character as CharacterVO
 from book.dto.schemas import BookItem, CharacterResponse, CreateBookResponse
 from book.infra.db_models.book import Book
+from core.setting.load_env import CLOUDFRONT_DOMAIN
 
 
 class BookMapper:
@@ -22,6 +23,7 @@ class BookMapper:
             gamemode=book.gamemode,
             character=_character,
             title=book.title,
+            title_img=book.title_img,
             background=book.background,
             is_in_progress=book.is_in_progress,
             created_at=book.created_at,
@@ -37,6 +39,7 @@ class BookMapper:
             gamemode=book.gamemode,
             character=book.character.__dict__,
             title=book.title,
+            title_img=book.title_img,
             background=book.background,
             is_in_progress=book.is_in_progress,
             created_at=book.created_at,
@@ -52,6 +55,7 @@ class BookMapper:
             gamemode=book.gamemode,
             character=CharacterVO(**book.character),
             title=book.title,
+            title_img=book.title_img,
             background=book.background,
             is_in_progress=book.is_in_progress,
             created_at=book.created_at,
@@ -67,7 +71,7 @@ class BookMapper:
             result.append(
                 BookItem(
                     book_id=book.id,
-                    title_img_url="https://placehold.co/400",
+                    title_img_url=CLOUDFRONT_DOMAIN + book.title_img,
                     title=book.title,
                     author=username,
                     background=book.background,
@@ -85,7 +89,7 @@ class BookMapper:
             result.append(
                 BookItem(
                     book_id=book.id,
-                    title_img_url="https://placehold.co/400",
+                    title_img_url=CLOUDFRONT_DOMAIN + book.title_img,
                     title=book.title,
                     author=username,
                     background=book.background,
@@ -102,7 +106,7 @@ class BookMapper:
             result.append(
                 BookItem(
                     book_id=book.id,
-                    title_img_url="https://placehold.co/400",
+                    title_img_url=CLOUDFRONT_DOMAIN + book.title_img,
                     title=book.title,
                     author=username,
                     background=book.background,
@@ -121,7 +125,7 @@ class BookMapper:
             result.append(
                 BookItem(
                     book_id=book.id,
-                    title_img_url="https://placehold.co/400",
+                    title_img_url=CLOUDFRONT_DOMAIN + book.title_img,
                     title=book.title,
                     author=username,
                     background=book.background,
@@ -146,7 +150,7 @@ class BookMapper:
             result.append(
                 BookItem(
                     book_id=book.id,
-                    title_img_url="https://placehold.co/400",
+                    title_img_url=CLOUDFRONT_DOMAIN + book.title_img,
                     title=book.title,
                     author=username,
                     background=book.background,
@@ -169,7 +173,7 @@ class BookMapper:
             result.append(
                 BookItem(
                     book_id=book.id,
-                    title_img_url="https://placehold.co/400",
+                    title_img_url=CLOUDFRONT_DOMAIN + book.title_img,
                     title=book.title,
                     author=username,
                     background=book.background,
