@@ -37,6 +37,7 @@ def create_app() -> FastAPI:
     app = FastAPI(lifespan=lifespan, default_response_class=ApiResponseWrapper)
 
     exempt_paths = [
+        "/v1/test-login",
         "/v1/token/reissue",
         "/v1/login",
         "/v1/signup",

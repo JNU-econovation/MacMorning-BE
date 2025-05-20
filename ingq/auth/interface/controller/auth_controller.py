@@ -60,3 +60,30 @@ def sign_up(
 ) -> SignUpResponse:
     _user = user_service.register_user(user)
     return _user
+
+
+@router.post("/test-login")
+@inject
+async def test_login(
+    user_id: str,
+    auth_service: AuthService = Depends(Provide[Container.auth_service]),
+):
+    auth_token = await auth_service.test_login(user_id)
+
+    response_body = {"token_expires_in": f"{auth_token.token_expires_in}s"}
+
+    response = ApiResponseWrapper(content=success_response(response_body))
+
+    response.headers["Authorization"] = f"Bearer {auth_token.access_token}"
+
+    response.set_cookie(
+        key="refresh_token",
+        value=auth_token.refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=REFRESH_TOKEN_EXPIRE_SECONDS,
+        path="/",
+    )
+
+    return response
