@@ -78,6 +78,7 @@ class CreateBookResponse(BaseModel):
     gamemode: bool
     character: CharacterResponse
     title: str
+    title_img: str
     background: str
     is_in_progress: bool
     created_at: datetime
