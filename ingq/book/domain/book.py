@@ -19,6 +19,7 @@ class Book:
     gamemode: bool
     character: Character
     title: str
+    title_img: str
     background: str
     is_in_progress: bool
     created_at: datetime
@@ -43,6 +44,7 @@ class Book:
             gamemode=request.gamemode,
             character=_character,
             title=request.title,
+            title_img="basic.png",
             background=request.background,
             is_in_progress=request.is_in_progress,
             created_at=now,
