@@ -82,3 +82,11 @@ class UserService:
             raise InvalidCredentialsException() from err
 
         return UserMapper.to_domain_user(user)
+
+    def find_user_by_id(self, user_id: str) -> UserVO:
+        user = self.user_repository.find_by_id(user_id)
+
+        if user is None:
+            raise UserNotFoundException()
+
+        return UserMapper.to_domain_user(user)
