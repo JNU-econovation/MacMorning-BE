@@ -29,3 +29,17 @@ class CreateChoiceResponse(BaseModel):
     is_success: bool
     created_at: datetime
     updated_at: datetime
+
+
+# ============================================================================
+# Choice 조회 관련 DTO
+class ChoiceItem(BaseModel):
+    choice_id: int
+    story_id: int
+    first_choice: str
+    second_choice: str
+    third_choice: Optional[str]
+    my_choice: int
+    is_success: bool
+    created_at: datetime
+    updated_at: datetime
