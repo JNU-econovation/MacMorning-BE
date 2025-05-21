@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
@@ -11,5 +12,5 @@ class IllustRepository(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def find_by_story_id(self, story_id: int, db: Session) -> Illust:
+    def find_by_story_id(self, story_id: int, db: Session) -> Optional[Illust]:
         raise NotImplementedError
