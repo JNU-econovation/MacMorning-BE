@@ -1,3 +1,4 @@
+import re
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -46,6 +47,7 @@ def create_app() -> FastAPI:
         "/docs",
         "/openapi.json",
         "/redoc",
+        re.compile(r"^/v1/book/\d+/story/\d+$"),
     ]
 
     app.container = container
