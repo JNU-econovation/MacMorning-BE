@@ -41,3 +41,12 @@ class InvalidUserAccessException(StoryException):
             status_code=status.HTTP_403_FORBIDDEN,
             detail="해당 책에 대한 접근 권한이 없습니다.",
         )
+
+
+class StoryNotFoundException(StoryException):
+    def __init__(self):
+        super().__init__(
+            code="STORY005",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="해당 하는 스토리를 찾을 수 없습니다.",
+        )
