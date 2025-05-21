@@ -29,7 +29,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         return False
 
     async def dispatch(self, request: Request, call_next):
-        if self.is_exempt_path(request.url.path):
+        if await self.is_exempt_path(request.url.path):
             request.state.current_user = None
             return await call_next(request)
 
