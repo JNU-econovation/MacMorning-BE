@@ -9,3 +9,7 @@ class IllustRepository(metaclass=ABCMeta):
     @abstractmethod
     def save(self, illust: Illust, db: Session) -> Illust:
         raise NotImplementedError
+
+    @abstractmethod
+    def find_by_story_id(self, story_id: int, db: Session) -> Illust:
+        raise NotImplementedError
