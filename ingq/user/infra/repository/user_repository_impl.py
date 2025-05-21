@@ -31,7 +31,12 @@ class UserRepositoryImpl(UserRepository):
 
         return new_user
 
-    def find_by_email(self, email) -> User:
+    def find_by_email(self, email: str) -> User:
         with SessionLocal() as db:
             user = db.query(User).filter(User.email == email).first()
+        return user
+
+    def find_by_id(self, user_id: str) -> User:
+        with SessionLocal() as db:
+            user = db.query(User).filter(User.id == user_id).first()
         return user
