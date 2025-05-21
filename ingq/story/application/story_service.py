@@ -11,12 +11,14 @@ from story.domain.story import Story
 from story.dto.schemas import (
     CreateStoryWithIllustAndChoiceRequest,
     CreateStoryWithIllustAndChoiceResponse,
+    GetStoryWithIllustAndChoiceResponse,
 )
 from story.exception.story_exception import (
     DuplicatePageNumberException,
     InvalidBookProgressException,
     InvalidChoiceException,
     InvalidUserAccessException,
+    StoryNotFoundException,
 )
 from story.utils.mapper import StoryMapper
 
@@ -68,10 +70,10 @@ class StoryService:
         )
 
     def get_story_by_book_id_and_page_number(
-        self, book_id: int, page_number: int
+        self, book_id: int, page_number: int, db: Optional[Session] = None
     ) -> Optional[Story]:
         return self.story_repository.find_by_book_id_and_page_number(
-            book_id, page_number
+            book_id, page_number, db
         )
 
     def _validate_and_get_book(self, user_id, book_id, story_request):
@@ -101,3 +103,24 @@ class StoryService:
                 raise InvalidChoiceException()
             return self.choice_service.create_choice(story_id, choice_request, session)
         return None
+
+    def get_story_with_illust_and_choice(
+        self, user_id: str, book_id: int, page_number: int, session: Session
+    ) -> GetStoryWithIllustAndChoiceResponse:
+        book = self.book_service.get_book_by_id_or_throw(book_id)
+        story = self.get_story_by_book_id_and_page_number(
+            book_id, page_number, db=session
+        )
+
+        if not story:
+            raise StoryNotFoundException()
+
+        if book.is_in_progress:
+            if user_id is None or book.user_id != user_id:
+                raise InvalidUserAccessException()
+
+        return GetStoryWithIllustAndChoiceResponse(
+            story=StoryMapper.storyvo_to_story_item(story),
+            illust=self.illust_service.get_illust_item_by_story_id(story.id, session),
+            choice=self.choice_service.get_choice_item_by_story_id(story.id, session),
+        )
