@@ -3,8 +3,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from choice.dto.schemas import CreateChoiceRequest, CreateChoiceResponse
-from illust.dto.schemas import CreateIllustRequest, CreateIllustResponse
+from choice.dto.schemas import ChoiceItem, CreateChoiceRequest, CreateChoiceResponse
+from illust.dto.schemas import CreateIllustRequest, CreateIllustResponse, IllustItem
 
 
 # ============================================================================
@@ -39,3 +39,27 @@ class CreateStoryWithIllustAndChoiceResponse(BaseModel):
     story: CreateStoryResponse
     illust: Optional[CreateIllustResponse] = None
     choice: Optional[CreateChoiceResponse] = None
+
+
+# ============================================================================
+# Story 조회 관련 DTO
+class GetStoryRequest(BaseModel):
+    book_id: int
+    page_number: int
+
+
+# Story 조회 시 반환 할 DTO
+class StoryItem(BaseModel):
+    story_id: int
+    book_id: int
+    page_number: int
+    story_text: str
+    created_at: datetime
+    updated_at: datetime
+
+
+# Story 조회 시 반환 할 DTO(이미지, 선택지 포함)
+class GetStoryWithIllustAndChoiceResponse(BaseModel):
+    story: StoryItem
+    illust: Optional[IllustItem] = None
+    choice: Optional[ChoiceItem] = None

@@ -18,8 +18,18 @@ class AuthMiddleware(BaseHTTPMiddleware):
         self.jwt_token_provider = jwt_token_provider
         self.exempt_paths = exempt_paths
 
+    async def is_exempt_path(self, path: str) -> bool:
+        for pattern in self.exempt_paths:
+            if isinstance(pattern, str):
+                if path == pattern:
+                    return True
+            else:
+                if pattern.match(path):
+                    return True
+        return False
+
     async def dispatch(self, request: Request, call_next):
-        if request.url.path in self.exempt_paths:
+        if await self.is_exempt_path(request.url.path):
             request.state.current_user = None
             return await call_next(request)
 

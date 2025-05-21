@@ -17,16 +17,23 @@ class MysqlStoryRepository(StoryRepository):
         return StoryMapper.story_to_storyvo(new_story)
 
     def find_by_book_id_and_page_number(
-        self, book_id: int, page_number: int
+        self, book_id: int, page_number: int, db: Optional[Session] = None
     ) -> Optional[StoryVO]:
-        with SessionLocal() as db:
+        if db is not None:
             story = (
                 db.query(Story)
                 .filter(Story.book_id == book_id, Story.page_number == page_number)
                 .first()
             )
+        else:
+            with SessionLocal() as local_db:
+                story = (
+                    local_db.query(Story)
+                    .filter(Story.book_id == book_id, Story.page_number == page_number)
+                    .first()
+                )
 
-            if not story:
-                return None
+        if not story:
+            return None
 
-            return StoryMapper.story_to_storyvo(story)
+        return StoryMapper.story_to_storyvo(story)

@@ -1,5 +1,5 @@
 from illust.domain.illust import Illust as IllustVO
-from illust.dto.schemas import CreateIllustResponse
+from illust.dto.schemas import CreateIllustResponse, IllustItem
 from illust.infra.db_models.illust import Illust
 
 
@@ -29,6 +29,17 @@ class IllustMapper:
     def illust_to_illustvo(illust: Illust) -> IllustVO:
         return IllustVO(
             id=illust.id,
+            story_id=illust.story_id,
+            image_url=illust.image_url,
+            created_at=illust.created_at,
+            updated_at=illust.updated_at,
+        )
+
+    # Domain 계층에서 사용하는 메서드
+    @staticmethod
+    def illustvo_to_illust_item(illust: IllustVO) -> IllustItem:
+        return IllustItem(
+            illust_id=illust.id,
             story_id=illust.story_id,
             image_url=illust.image_url,
             created_at=illust.created_at,
