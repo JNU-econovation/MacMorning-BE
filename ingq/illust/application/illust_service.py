@@ -1,10 +1,11 @@
 from datetime import datetime, timezone
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
 from illust.domain.illust import Illust
 from illust.domain.repository.illust_repository import IllustRepository
-from illust.dto.schemas import CreateIllustRequest, CreateIllustResponse
+from illust.dto.schemas import CreateIllustRequest, CreateIllustResponse, IllustItem
 from illust.utils.mapper import IllustMapper
 
 
@@ -25,3 +26,13 @@ class IllustService:
         saved_illust = self.illust_repository.save(illust, db=session)
 
         return IllustMapper.to_create_illust_response(saved_illust)
+
+    def get_illust_item_by_story_id(
+        self, story_id: int, session: Session
+    ) -> Optional[IllustItem]:
+        illust = self.illust_repository.find_by_story_id(story_id, db=session)
+
+        if not illust:
+            return None
+
+        return IllustMapper.illustvo_to_illust_item(illust)
