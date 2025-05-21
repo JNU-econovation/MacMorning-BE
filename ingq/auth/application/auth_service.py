@@ -16,4 +16,5 @@ class AuthService:
         return await self.auth_token_service.generate_auth_token(user.id)
 
     async def test_login(self, user_id: str) -> AuthToken:
+        self.user_service.find_user_by_id(user_id)
         return await self.auth_token_service.generate_auth_token(user_id)
