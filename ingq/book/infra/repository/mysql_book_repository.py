@@ -202,7 +202,7 @@ class MysqlBookRepository(BookRepository):
                 books=book_items, next_cursor=next_cursor, page_info=page_info
             )
 
-    def is_bookmarked(self, user_id: Optional[str], book_id: int) -> bool:
+    def is_bookmarked(self, user_id: Optional[str], book_id: int) -> Optional[bool]:
         if user_id is None:
             return None
 

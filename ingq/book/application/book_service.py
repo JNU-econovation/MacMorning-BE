@@ -35,7 +35,7 @@ class BookService:
         saved_book = self.book_repository.save(book)
         return BookMapper.book_to_create_book_response(saved_book)
 
-    def get_book_detail(self, user_id: str, book_id: int) -> BookDetailItem:
+    def get_book_detail(self, user_id: Optional[str], book_id: int) -> BookDetailItem:
         book = self.get_book_by_id_or_throw(book_id)
         author = self.user_service.find_user_by_id(book.user_id)
 
