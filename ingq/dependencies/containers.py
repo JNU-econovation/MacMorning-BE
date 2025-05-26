@@ -59,7 +59,11 @@ class Container(containers.DeclarativeContainer):
     )
 
     book_repository = providers.Factory(MysqlBookRepository)
-    book_service = providers.Factory(BookService, book_repository=book_repository)
+    book_service = providers.Factory(
+        BookService,
+        book_repository=book_repository,
+        user_service=user_service,
+    )
 
     bookmark_repository = providers.Factory(MysqlBookmarkRepository)
     bookmark_service = providers.Factory(
