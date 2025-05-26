@@ -109,6 +109,23 @@ class BookItem(BaseModel):
     bookmark_count: Optional[int] = None
 
 
+# Book 상세 조회 관련 DTO
+class BookDetailItem(BaseModel):
+    book_id: int
+    title_img_url: str
+    title: str
+    author: str
+    background: Optional[str] = None
+    is_bookmarked: Optional[bool] = Field(
+        default=None,
+        description="로그인 완료된 사용자에게만 제공, 비로그인 시 미포함 필드",
+    )
+    character: CharacterResponse
+    genre: list[str]
+    created_at: datetime
+    updated_at: datetime
+
+
 # ============================================================================
 # 커서 기반 페이지 네이션 관련 DTO
 class PageInfo(BaseModel):
