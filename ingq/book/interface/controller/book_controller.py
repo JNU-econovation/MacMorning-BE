@@ -6,7 +6,12 @@ from fastapi import APIRouter, Depends, Query, Request
 from auth.application.jwt_token_provider import JwtTokenProvider
 from auth.utils.user_extractor import get_optional_current_user
 from book.application.book_service import BookService
-from book.dto.schemas import CreateBookRequest, CreateBookResponse, PaginatedBookItem
+from book.dto.schemas import (
+    BookDetailItem,
+    CreateBookRequest,
+    CreateBookResponse,
+    PaginatedBookItem,
+)
 from book.infra.pagination.order_strategy import OrderStrategy
 from dependencies.containers import Container
 
@@ -22,6 +27,21 @@ def create_book(
 ) -> CreateBookResponse:
     current_user = request.state.current_user
     return book_service.create_book(current_user.id, create_book_request)
+
+
+@router.get("/book/{book_id}", status_code=200)
+@inject
+def get_book_detail(
+    request: Request,
+    book_id: int,
+    book_service: BookService = Depends(Provide[Container.book_service]),
+    jwt_token_provider: JwtTokenProvider = Depends(
+        Provide[Container.jwt_token_provider]
+    ),
+) -> BookDetailItem:
+    current_user = get_optional_current_user(request, jwt_token_provider)
+    user_id = current_user.id if current_user else None
+    return book_service.get_book_detail(user_id, book_id)
 
 
 @router.get("/books", status_code=200)
