@@ -18,6 +18,7 @@ from book.infra.pagination.cursor import (
 from book.infra.pagination.order_strategy import OrderStrategy
 from book.infra.repository.book_query_builder import BookQueryBuilder
 from book.utils.mapper import BookMapper
+from bookmark.infra.db_models.bookmark import Bookmark
 from db.database import SessionLocal
 
 
@@ -200,3 +201,16 @@ class MysqlBookRepository(BookRepository):
             return PaginatedBookItem(
                 books=book_items, next_cursor=next_cursor, page_info=page_info
             )
+
+    def is_bookmarked(self, user_id: Optional[str], book_id: int) -> bool:
+        if user_id is None:
+            return None
+
+        with SessionLocal() as db:
+            bookmark = (
+                db.query(Bookmark)
+                .filter(Bookmark.user_id == user_id, Bookmark.book_id == book_id)
+                .first()
+            )
+
+            return bookmark is not None
