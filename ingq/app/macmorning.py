@@ -48,6 +48,7 @@ def create_app() -> FastAPI:
         "/openapi.json",
         "/redoc",
         re.compile(r"^/v1/book/\d+/story/\d+$"),
+        re.compile(r"^/v1/book/\d+$"),
     ]
 
     app.container = container
