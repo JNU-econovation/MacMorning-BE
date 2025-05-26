@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from book.domain.book import Book
 from book.domain.repository.book_repository import BookRepository
 from book.dto.schemas import (
+    BookDetailItem,
     CreateBookRequest,
     CreateBookResponse,
     PaginatedBookItem,
@@ -13,11 +14,18 @@ from book.dto.schemas import (
 from book.exception.book_exception import BookNotFoundException
 from book.infra.pagination.order_strategy import OrderStrategy
 from book.utils.mapper import BookMapper
+from story.exception.story_exception import InvalidUserAccessException
+from user.application.user_service import UserService
 
 
 class BookService:
-    def __init__(self, book_repository: BookRepository):
+    def __init__(
+        self,
+        book_repository: BookRepository,
+        user_service: UserService,
+    ):
         self.book_repository = book_repository
+        self.user_service = user_service
 
     def create_book(
         self, user_id: str, create_book_request: CreateBookRequest
@@ -26,6 +34,21 @@ class BookService:
         book = Book.create_book_request_to_book(user_id, create_book_request, now)
         saved_book = self.book_repository.save(book)
         return BookMapper.book_to_create_book_response(saved_book)
+
+    def get_book_detail(self, user_id: str, book_id: int) -> BookDetailItem:
+        book = self.get_book_by_id_or_throw(book_id)
+        author = self.user_service.find_user_by_id(book.user_id)
+
+        if book.is_in_progress:
+            if user_id is None or book.user_id != user_id:
+                raise InvalidUserAccessException()
+
+        if user_id:
+            is_bookmarked = self.book_repository.is_bookmarked(user_id, book_id)
+        else:
+            is_bookmarked = None
+
+        return BookMapper.book_to_book_detail_item(book, author.username, is_bookmarked)
 
     def get_all_books(
         self,
