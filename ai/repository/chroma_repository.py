@@ -167,7 +167,23 @@ class ChromaRepository(BaseVectorRepository):
     
     def delete_collection(self, book_id: str) -> None:
         collection_name = self._get_collection_name(book_id)
+        print(f"삭제 시도할 컬렉션 이름: {collection_name}")
         try:
-            self.client.delete_collection(name=collection_name)
-        except Exception:
-            pass
+            # 삭제 전 확인
+            if self.exists_collection(book_id):
+                print(f"컬렉션 존재함. 삭제 시작...")
+                self.client.delete_collection(name=collection_name)
+                print(f"컬렉션 삭제 명령 완료")
+                
+                # 삭제 후 확인
+                if not self.exists_collection(book_id):
+                    print(f"컬렉션 삭제 성공 확인됨")
+                else:
+                    print(f"⚠️ 컬렉션이 여전히 존재함!")
+            else:
+                print(f"삭제할 컬렉션이 존재하지 않음")
+        except Exception as e:
+            print(f"컬렉션 삭제 중 오류: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            raise

@@ -45,6 +45,20 @@ class AiService:
             """
         )
         self.story_chain = self.story_prompt | self.llm | StrOutputParser()
+        
+        #이야기 생성 프롬프트 템플릿 초기화
+        self.ending_prompt = PromptTemplate(
+            input_variables=["genre", "character", "story", "background"],
+            template="""
+            이야기의 배경: {background}
+            주인공 및 이야기 설정 : {character}
+            장르 : {genre}
+            지금까지의 이야기: {story}
+            
+            지금까지의 이야기를 바탕으로 이야기의 끝을 맺어주세요. 이야기는 10~15문장정도로 끝낼 수 있도록 해 주세요.
+            """
+        )
+        self.ending_chain = self.ending_prompt | self.llm | StrOutputParser()
 
         #시놉시스 생성 프롬프트 템플릿 초기화
         self.synopsys_prompt = PromptTemplate(
@@ -59,15 +73,19 @@ class AiService:
         )
         self.synopsys_chain = self.synopsys_prompt | self.llm | StrOutputParser()
 
-    def generate_story(self, book_id, genre="", character="", background="", choice=""):
+    def generate_story(self, book_id, genre="", character="", background="", choice="", is_ending=False):
         try:
             all_vectors = self.vector_service.get_all_story_vectors(str(book_id))
             has_existing_story = len(all_vectors) > 0
             
             relevant_context = ""
             
-            #이전 내용과 선택지가 있다 - 두번째 이야기 생성부터의 로직
-            if choice and has_existing_story:
+            #이야기 마무리 로직
+            if is_ending and has_existing_story:
+                relevant_context = self.vector_service.get_story_context_for_ending(str(book_id))
+                print(f"엔딩 모드 - 컨텍스트 길이 : {len(relevant_context)}")
+            #두번째 이야기 생성부터의 로직
+            elif choice and has_existing_story:
                 similar_docs = self.vector_service.search_similar_content(choice, str(book_id))
                 
                 if similar_docs:
@@ -80,16 +98,26 @@ class AiService:
                     relevant_context = '\n\n'.join([doc.page_content for doc in sorted_docs])
                     print(f"유사한 문서: {relevant_context}")
             
-            new_story = self.story_chain.invoke({
-                "genre": genre,
-                "character": character,
-                "background": background, 
-                "story": relevant_context,
-                "choice": choice or "이야기를 시작해주세요"
-            })
+            if is_ending:
+                new_story = self.ending_chain.invoke({
+                    "genre": genre,
+                    "character": character,
+                    "background": background, 
+                    "story": relevant_context,
+                })
+                #이야기가 마무리되었다면 DB에 남아있는 내용 모두 삭제
+                self.vector_service.delete_story(str(book_id))
+            else:
+                new_story = self.story_chain.invoke({
+                    "genre": genre,
+                    "character": character,
+                    "background": background, 
+                    "story": relevant_context,
+                    "choice": choice or "이야기를 시작해주세요"
+                })
+                #새로운 내용 벡터화 하여 저장
+                self.vector_service.add_new_content_to_vector(new_story, str(book_id))
             
-            #새로운 내용 벡터화 하여 저장
-            self.vector_service.add_new_content_to_vector(new_story, str(book_id))
             
             return {
                 "new_story": new_story,

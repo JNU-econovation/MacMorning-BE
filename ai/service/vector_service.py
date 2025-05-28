@@ -84,7 +84,55 @@ class VectorService:
             import traceback
             traceback.print_exc()
             return False
+        
+    #최근 스토리 청크 조회
+    def get_recent_story_chunks(self, book_id: str, count: int = 5) -> List[Document]:
+        try:
+            all_docs = self.repository.get_all_documents(book_id)
+            if not all_docs:
+                return []
+            
+            # chunk_id로 정렬하여 최근 것들 가져오기
+            sorted_docs = sorted(
+                all_docs,
+                key=lambda x: x.metadata.get('chunk_id', 0),
+                reverse=True  # 최신순
+            )
+            
+            return sorted_docs[:count]
+            
+        except Exception as e:
+            print(f"최근 스토리 청크 조회 중 오류 발생: {str(e)}")
+            return []
+    
 
-    #캐시 초기화
-    def clear_cache(self):
-        self.last_story_cache.clear()
+    #엔딩 스토리 컨텍스트 조회
+    def get_story_context_for_ending(self, book_id: str) -> str:
+        try:
+            recent_chunks = self.get_recent_story_chunks(book_id, 5)
+            all_chunks = self.repository.get_all_documents(book_id)
+            
+            if not all_chunks:
+                return ""
+            
+            # 최근 내용 (직접적 컨텍스트)
+            recent_content = '\n'.join([doc.page_content for doc in recent_chunks])
+            
+            # 전체 스토리의 키워드 추출 (간접적 컨텍스트)
+            all_content = '\n'.join([doc.page_content for doc in all_chunks])
+            
+            context = f"최근 이야기:\n{recent_content}\n\n전체 스토리 키워드: {all_content[:200]}..."
+            return context
+            
+        except Exception as e:
+            print(f"엔딩 컨텍스트 조회 중 오류 발생: {str(e)}")
+            return ""
+            
+    #스토리 삭제        
+    def delete_story(self, book_id: str) -> bool:
+        try:
+            self.repository.delete_collection(book_id)   
+            return True
+        except Exception as e:
+            print(f"스토리 삭제 중 오류 발생: {str(e)}")
+            return False
