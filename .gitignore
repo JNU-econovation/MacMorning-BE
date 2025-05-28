@@ -34,3 +34,4 @@ mysql/data/
 nginx/
 
 ingq.log*
+chroma_db/
