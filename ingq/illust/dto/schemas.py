@@ -23,3 +23,8 @@ class IllustItem(BaseModel):
     image_url: str
     created_at: datetime
     updated_at: datetime
+
+
+# Illust List 조회 관련 DTO
+class IllustItemList(BaseModel):
+    illusts: list[IllustItem]
