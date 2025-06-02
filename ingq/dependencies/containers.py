@@ -6,6 +6,7 @@ from auth.application.jwt_token_provider import JwtTokenProvider
 from auth.infra.repository.redis_refresh_token_repository import (
     RedisRefreshTokenRepository,
 )
+from book.application.book_reader import BookReader
 from book.application.book_service import BookService
 from book.infra.repository.mysql_book_repository import MysqlBookRepository
 from bookmark.application.bookmark_service import BookmarkService
@@ -65,6 +66,11 @@ class Container(containers.DeclarativeContainer):
         user_service=user_service,
     )
 
+    book_reader = providers.Factory(
+        BookReader,
+        book_repository=book_repository,
+    )
+
     bookmark_repository = providers.Factory(MysqlBookmarkRepository)
     bookmark_service = providers.Factory(
         BookmarkService,
@@ -74,7 +80,9 @@ class Container(containers.DeclarativeContainer):
 
     illust_repository = providers.Factory(MysqlIllustRepository)
     illust_service = providers.Factory(
-        IllustService, illust_repository=illust_repository
+        IllustService,
+        illust_repository=illust_repository,
+        book_reader=book_reader,
     )
 
     choice_repository = providers.Factory(MysqlChoiceRepository)
