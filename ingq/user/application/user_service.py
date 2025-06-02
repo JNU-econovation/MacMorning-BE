@@ -77,11 +77,12 @@ class UserService:
         if user is None:
             raise InvalidCredentialsException()
         try:
-            self.crypto.verify(password, user.password)
+            if self.crypto.verify(password, user.password):
+                return UserMapper.to_domain_user(user)
+            else:
+                raise InvalidCredentialsException()
         except Exception as err:
             raise InvalidCredentialsException() from err
-
-        return UserMapper.to_domain_user(user)
 
     def find_user_by_id(self, user_id: str) -> UserVO:
         user = self.user_repository.find_by_id(user_id)
