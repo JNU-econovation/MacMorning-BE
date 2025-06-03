@@ -3,7 +3,6 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from book.application.image_validation_service import ImageValidationService
 from book.domain.book import Book
 from book.domain.repository.book_repository import BookRepository
 from book.dto.schemas import (
@@ -16,6 +15,7 @@ from book.dto.schemas import (
 from book.exception.book_exception import BookNotFoundException
 from book.infra.pagination.order_strategy import OrderStrategy
 from book.utils.mapper import BookMapper
+from illust.application.image_validation_service import ImageValidationService
 from illust.exception.illust_exception import IllustDoesNotBelongToBookException
 from story.exception.story_exception import InvalidUserAccessException
 from user.application.user_service import UserService
