@@ -11,6 +11,7 @@ from book.dto.schemas import (
     CreateBookRequest,
     CreateBookResponse,
     PaginatedBookItem,
+    UpdateTitleImageRequest,
 )
 from book.infra.pagination.order_strategy import OrderStrategy
 from dependencies.containers import Container
@@ -162,3 +163,15 @@ def get_best_books(
     current_user = get_optional_current_user(request, jwt_token_provider)
     user_id = current_user.id if current_user else None
     return book_service.get_best_books(user_id, limit=limit, cursor=cursor)
+
+
+@router.put("/book/{book_id}/image", status_code=204)
+@inject
+def update_title_image(
+    request: Request,
+    book_id: int,
+    update_title_image_request: UpdateTitleImageRequest,
+    book_service: BookService = Depends(Provide[Container.book_service]),
+) -> None:
+    user_id = request.state.current_user.id
+    book_service.update_title_image(user_id, book_id, update_title_image_request)
