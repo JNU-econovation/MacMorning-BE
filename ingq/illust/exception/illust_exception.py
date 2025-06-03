@@ -7,6 +7,6 @@ class IllustDoesNotBelongToBookException(BusinessException):
     def __init__(self):
         super().__init__(
             code="ILLU001",
-            status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="해당 책에 속하는 이미지가 아닙니다.",
         )
