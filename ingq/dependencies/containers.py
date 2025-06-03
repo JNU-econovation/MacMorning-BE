@@ -14,6 +14,7 @@ from bookmark.infra.repository.mysql_bookmark_repository import MysqlBookmarkRep
 from choice.application.choice_service import ChoiceService
 from choice.infra.repository.mysql_choice_repository import MysqlChoiceRepository
 from illust.application.illust_service import IllustService
+from illust.application.image_validation_service import ImageValidationService
 from illust.infra.repository.mysql_illust_repository import MysqlIllustRepository
 from story.application.story_service import StoryService
 from story.infra.repository.mysql_story_repository import MysqlStoryRepository
@@ -60,10 +61,18 @@ class Container(containers.DeclarativeContainer):
     )
 
     book_repository = providers.Factory(MysqlBookRepository)
+
+    illust_repository = providers.Factory(MysqlIllustRepository)
+
+    image_validation_service = providers.Factory(
+        ImageValidationService, illust_repository=illust_repository
+    )
+
     book_service = providers.Factory(
         BookService,
         book_repository=book_repository,
         user_service=user_service,
+        image_validation_service=image_validation_service,
     )
 
     book_reader = providers.Factory(
@@ -78,7 +87,6 @@ class Container(containers.DeclarativeContainer):
         book_service=book_service,
     )
 
-    illust_repository = providers.Factory(MysqlIllustRepository)
     illust_service = providers.Factory(
         IllustService,
         illust_repository=illust_repository,
