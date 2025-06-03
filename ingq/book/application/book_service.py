@@ -3,6 +3,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
+from book.application.image_validation_service import ImageValidationService
 from book.domain.book import Book
 from book.domain.repository.book_repository import BookRepository
 from book.dto.schemas import (
@@ -10,10 +11,12 @@ from book.dto.schemas import (
     CreateBookRequest,
     CreateBookResponse,
     PaginatedBookItem,
+    UpdateTitleImageRequest,
 )
 from book.exception.book_exception import BookNotFoundException
 from book.infra.pagination.order_strategy import OrderStrategy
 from book.utils.mapper import BookMapper
+from illust.exception.illust_exception import IllustDoesNotBelongToBookException
 from story.exception.story_exception import InvalidUserAccessException
 from user.application.user_service import UserService
 
@@ -23,9 +26,11 @@ class BookService:
         self,
         book_repository: BookRepository,
         user_service: UserService,
+        image_validation_service: ImageValidationService,
     ):
         self.book_repository = book_repository
         self.user_service = user_service
+        self.image_validation_service = image_validation_service
 
     def create_book(
         self, user_id: str, create_book_request: CreateBookRequest
@@ -114,3 +119,24 @@ class BookService:
         book.updated_at = now
         book.set_is_in_progress_to_false()
         return self.book_repository.update_is_in_progress_to_false(book, db)
+
+    def update_title_image(
+        self,
+        user_id: str,
+        book_id: int,
+        update_title_image_request: UpdateTitleImageRequest,
+    ) -> None:
+        book = self.get_book_by_id_or_throw(book_id)
+
+        if book.user_id != user_id:
+            raise InvalidUserAccessException()
+
+        title_img = update_title_image_request.title_img
+
+        if not self.image_validation_service.is_image_belongs_to_book(
+            title_img, book_id
+        ):
+            raise IllustDoesNotBelongToBookException()
+
+        book.title_img = title_img
+        self.book_repository.update_title_image(book)
