@@ -137,3 +137,13 @@ class PaginatedBookItem(BaseModel):
     books: list[BookItem]
     next_cursor: Optional[Any]
     page_info: PageInfo
+
+
+# ============================================================================
+# Book 제목 이미지 수정 관련 DTO
+class UpdateTitleImageRequest(BaseModel):
+    title_img: str = Field(
+        ...,
+        min_length=1,
+        description="업데이트 할 타이틀 이미지 파일명",
+    )
