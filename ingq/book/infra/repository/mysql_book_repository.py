@@ -214,3 +214,13 @@ class MysqlBookRepository(BookRepository):
             )
 
             return bookmark is not None
+
+    def update_title_image(self, book: Book) -> None:
+        with SessionLocal() as db:
+            try:
+                existing_book = db.query(Book).filter(Book.id == book.id).first()
+                existing_book.title_img = book.title_img
+                db.commit()
+            except Exception as exc:
+                db.rollback()
+                raise exc
