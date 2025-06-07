@@ -32,3 +32,12 @@ class UserAlreadyExistsException(UserException):
             status_code=status.HTTP_409_CONFLICT,
             detail="이미 존재하는 이메일입니다.",
         )
+
+
+class EmailAlreadyExistsException(UserException):
+    def __init__(self):
+        super().__init__(
+            code="USER004",
+            status_code=status.HTTP_409_CONFLICT,
+            detail="이미 존재하는 이메일입니다.",
+        )

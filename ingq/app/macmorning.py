@@ -41,6 +41,7 @@ def create_app() -> FastAPI:
 
     exempt_paths = [
         "/v1/test-login",
+        "/v1/email",
         "/v1/token/reissue",
         "/v1/login",
         "/v1/signup",

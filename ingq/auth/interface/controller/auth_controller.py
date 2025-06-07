@@ -13,7 +13,12 @@ from core.setting.load_env import (
 )
 from dependencies.containers import Container
 from user.application.user_service import UserService
-from user.dto.schemas import SignUpRequest, SignUpResponse
+from user.dto.schemas import (
+    EmailCheckRequest,
+    EmailCheckResponse,
+    SignUpRequest,
+    SignUpResponse,
+)
 
 router = APIRouter(prefix="/v1", tags=["Auth Router"])
 
@@ -60,6 +65,15 @@ def sign_up(
 ) -> SignUpResponse:
     _user = user_service.register_user(user)
     return _user
+
+
+@router.post("/email", status_code=200)
+@inject
+def check_duplicate_email(
+    email: EmailCheckRequest,
+    user_service: UserService = Depends(Provide[Container.user_service]),
+) -> EmailCheckResponse:
+    return user_service.check_duplicate_email(email)
 
 
 @router.post("/test-login")
