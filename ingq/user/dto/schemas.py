@@ -40,3 +40,11 @@ class UserResponse(BaseModel):
     username: str
     phone_number: str
     provider: Provider
+
+
+class EmailCheckRequest(BaseModel):
+    email: EmailStr
+
+
+class EmailCheckResponse(BaseModel):
+    message: str
