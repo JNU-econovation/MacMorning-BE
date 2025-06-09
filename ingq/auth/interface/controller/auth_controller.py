@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from auth.application.auth_service import AuthService
@@ -101,3 +101,14 @@ async def test_login(
     )
 
     return response
+
+
+@router.get("/verification")
+@inject
+def verify_access_token(
+    request: Request,
+    user_service: UserService = Depends(Provide[Container.user_service]),
+) -> bool:
+    current_user = request.state.current_user
+    user_service.find_user_by_id(current_user.id)
+    return True
