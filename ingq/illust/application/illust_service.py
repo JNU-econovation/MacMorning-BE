@@ -49,7 +49,7 @@ class IllustService:
 
         return IllustMapper.illustvo_to_illust_item(illust)
 
-    def get_illust_item_list_by_book(
+    def get_illust_item_list_by_book_id(
         self,
         user_id: str,
         book_id: int,

@@ -3,15 +3,27 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
+from book.application.book_reader import BookReader
 from choice.domain.choice import Choice
 from choice.domain.repository.choice_repository import ChoiceRepository
-from choice.dto.schemas import ChoiceItem, CreateChoiceRequest, CreateChoiceResponse
+from choice.dto.schemas import (
+    ChoiceItem,
+    CreateChoiceRequest,
+    CreateChoiceResponse,
+    LastChoiceItemList,
+)
 from choice.utils.mapper import ChoiceMapper
+from story.exception.story_exception import InvalidUserAccessException
 
 
 class ChoiceService:
-    def __init__(self, choice_repository: ChoiceRepository):
+    def __init__(
+        self,
+        choice_repository: ChoiceRepository,
+        book_reader: BookReader,
+    ):
         self.choice_repository = choice_repository
+        self.book_reader = book_reader
 
     def create_choice(
         self,
@@ -37,3 +49,27 @@ class ChoiceService:
             return None
 
         return ChoiceMapper.choicevo_to_choice_item(choice)
+
+    def get_selected_choice_item_by_book_id(
+        self,
+        user_id: str,
+        book_id: int,
+    ) -> LastChoiceItemList:
+        book = self.book_reader.get_book_by_id_or_throw(book_id)
+
+        if book.user_id != user_id:
+            raise InvalidUserAccessException()
+
+        choices = self.choice_repository.find_all_by_book_id(book.id)
+
+        last_choices = [
+            ChoiceMapper.choicevo_to_last_choice_item(
+                choice,
+                [choice.first_choice, choice.second_choice, choice.third_choice][
+                    choice.my_choice - 1
+                ],
+            )
+            for choice in choices
+        ]
+
+        return LastChoiceItemList(choices=last_choices)

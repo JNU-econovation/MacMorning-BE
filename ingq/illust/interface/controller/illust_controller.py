@@ -16,4 +16,4 @@ def get_all_illust(
     illust_service: IllustService = Depends(Provide[Container.illust_service]),
 ) -> IllustItemList:
     current_user = request.state.current_user
-    return illust_service.get_illust_item_list_by_book(current_user.id, book_id)
+    return illust_service.get_illust_item_list_by_book_id(current_user.id, book_id)

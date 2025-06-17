@@ -6,6 +6,8 @@ from choice.domain.choice import Choice as ChoiceVO
 from choice.domain.repository.choice_repository import ChoiceRepository
 from choice.infra.db_models.choice import Choice
 from choice.utils.mapper import ChoiceMapper
+from db.database import SessionLocal
+from story.infra.db_models.story import Story
 
 
 class MysqlChoiceRepository(ChoiceRepository):
@@ -22,3 +24,13 @@ class MysqlChoiceRepository(ChoiceRepository):
             return None
 
         return ChoiceMapper.choice_to_choicevo(choice)
+
+    def find_all_by_book_id(self, book_id: int) -> list[Choice]:
+        with SessionLocal() as db:
+            choices = (
+                db.query(Choice)
+                .join(Choice.story)
+                .filter(Story.book_id == book_id)
+                .all()
+            )
+            return ChoiceMapper.choices_to_choicesvo(choices)
