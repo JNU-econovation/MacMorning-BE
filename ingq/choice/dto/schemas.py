@@ -43,3 +43,19 @@ class ChoiceItem(BaseModel):
     is_success: bool
     created_at: datetime
     updated_at: datetime
+
+
+# ============================================================================
+class LastChoiceItem(BaseModel):
+    choice_id: int
+    story_id: int
+    choice_content: str  # 1, 2, 3 번 선택지 중 사용자가 입력한 선택지
+    my_choice: int
+    is_success: bool
+    reason: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class LastChoiceItemList(BaseModel):
+    choices: list[LastChoiceItem]
