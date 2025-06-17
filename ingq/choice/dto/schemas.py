@@ -52,7 +52,7 @@ class LastChoiceItem(BaseModel):
     choice_content: str  # 1, 2, 3 번 선택지 중 사용자가 입력한 선택지
     my_choice: int
     is_success: bool
-    reason: str
+    reason: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
