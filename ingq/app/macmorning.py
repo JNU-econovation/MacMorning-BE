@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from auth.interface.controller.auth_controller import router as auth_router
 from book.interface.controller.book_controller import router as book_router
 from bookmark.interface.controller.bookmark_controller import router as bookmark_router
+from choice.interface.controller.choice_controller import router as choice_router
 from config.cors_config import CorsConfig
 from config.openapi_config import custom_openapi
 from core.auth_middleware import AuthMiddleware
@@ -32,6 +33,7 @@ def create_app() -> FastAPI:
             "auth.interface.controller.auth_controller",
             "book.interface.controller.book_controller",
             "bookmark.interface.controller.bookmark_controller",
+            "choice.interface.controller.choice_controller",
             "illust.interface.controller.illust_controller",
             "story.interface.controller.story_controller",
             "upload_image.interface.controller.upload_controller",
@@ -64,6 +66,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(book_router)
     app.include_router(bookmark_router)
+    app.include_router(choice_router)
     app.include_router(illust_router)
     app.include_router(story_router)
     app.include_router(upload_router)
