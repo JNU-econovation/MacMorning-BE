@@ -3,7 +3,6 @@ from choice.dto.schemas import (
     ChoiceItem,
     CreateChoiceResponse,
     LastChoiceItem,
-    LastChoiceItemList,
 )
 from choice.infra.db_models.choice import Choice
 
