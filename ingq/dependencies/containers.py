@@ -95,7 +95,9 @@ class Container(containers.DeclarativeContainer):
 
     choice_repository = providers.Factory(MysqlChoiceRepository)
     choice_service = providers.Factory(
-        ChoiceService, choice_repository=choice_repository
+        ChoiceService,
+        choice_repository=choice_repository,
+        book_reader=book_reader,
     )
 
     story_repository = providers.Factory(MysqlStoryRepository)
