@@ -83,7 +83,7 @@ def end_story(book_id: int, authorization: str=Header(None)):
         # book_info = get_book(book_id, authorization)
         book_info = hardcoded_book_info.get(book_id)
 
-        if book_info and end_story:
+        if book_info:
             genre = book_info.get("genre")
             character = book_info.get("character")
             background = book_info.get("background")

@@ -4,6 +4,9 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from repository.base_vector_repository import BaseVectorRepository
 from repository.chroma_repository import ChromaRepository
 from core.vector_config import vector_config
+import logging
+
+logger = logging.getLogger(__name__)
 
 class VectorService:
     def __init__(self, repository: Optional[BaseVectorRepository] = None):
@@ -22,7 +25,7 @@ class VectorService:
         try:
             return self.repository.get_all_documents(book_id)
         except Exception as e:
-            print(f"모든 벡터 조회 중 오류 발생: {str(e)}")
+            logger.error(f"모든 벡터 조회 중 오류 발생: {str(e)}")
             return []
     
     #유사도 검색
@@ -37,33 +40,33 @@ class VectorService:
             )
             return similar_docs
         except Exception as e:
-            print(f"유사도 검색 중 오류 발생: {str(e)}")
+            logger.error(f"유사도 검색 중 오류 발생: {str(e)}")
             return []
 
-    #벡터 저장    
+    # 벡터 저장    
     def add_new_content_to_vector(self, new_content: str, book_id: str) -> bool:
         try:
-            print(f"벡터 저장 시작 - book_id: {book_id}, 내용 길이: {len(new_content)}")
+            logger.info(f"벡터 저장 시작 - book_id: {book_id}, 내용 길이: {len(new_content)}")
 
-            #청크 분할            
+            # 청크 분할            
             chunks = self.text_splitter.split_text(new_content)
-            print(f"생성된 청크 개수: {len(chunks)}")
+            logger.debug(f"생성된 청크 개수: {len(chunks)}")
             
             if not chunks:
-                print("청크가 생성되지 않았습니다.")
+                logger.warning("청크가 생성되지 않았습니다.")
                 return False
             
             # 현재 문서 개수 조회 (chunk_id 계산용)
             current_count = 0
             try:
                 current_count = self.repository.get_document_count(book_id)
-                print(f"현재 문서 개수: {current_count}")
+                logger.debug(f"현재 문서 개수: {current_count}")
             except Exception as e:
-                print(f"현재 문서 개수 조회 실패: {str(e)}")
+                logger.error(f"현재 문서 개수 조회 실패: {str(e)}")
             
             # 각 청크를 개별적으로 저장
             for i, chunk in enumerate(chunks):
-                print(f"청크 {i+1}/{len(chunks)} 저장 중...")
+                logger.info(f"청크 {i+1}/{len(chunks)} 저장 중...")
                 document = Document(
                     page_content=chunk,
                     metadata={
@@ -74,13 +77,13 @@ class VectorService:
                     }
                 )
                 self.repository.add_single_document(document, book_id)
-                print(f"청크 {i+1} 저장 완료")
+                logger.info(f"청크 {i+1} 저장 완료")
             
-            print(f"모든 청크 저장 완료 - 총 {len(chunks)}개")
+            logger.info(f"모든 청크 저장 완료 - 총 {len(chunks)}개")
             return True
             
         except Exception as e:
-            print(f"새로운 내용 벡터 저장 중 오류 발생: {str(e)}")
+            logger.error(f"새로운 내용 벡터 저장 중 오류 발생: {str(e)}")
             import traceback
             traceback.print_exc()
             return False
@@ -102,7 +105,7 @@ class VectorService:
             return sorted_docs[:count]
             
         except Exception as e:
-            print(f"최근 스토리 청크 조회 중 오류 발생: {str(e)}")
+            logger.error(f"최근 스토리 청크 조회 중 오류 발생: {str(e)}")
             return []
     
 
@@ -125,7 +128,7 @@ class VectorService:
             return context
             
         except Exception as e:
-            print(f"엔딩 컨텍스트 조회 중 오류 발생: {str(e)}")
+            logger.error(f"엔딩 컨텍스트 조회 중 오류 발생: {str(e)}")
             return ""
             
     #스토리 삭제        
@@ -134,5 +137,5 @@ class VectorService:
             self.repository.delete_collection(book_id)   
             return True
         except Exception as e:
-            print(f"스토리 삭제 중 오류 발생: {str(e)}")
+            logger.error(f"스토리 삭제 중 오류 발생: {str(e)}")
             return False
