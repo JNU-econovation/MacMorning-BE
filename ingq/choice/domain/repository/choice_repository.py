@@ -18,3 +18,11 @@ class ChoiceRepository(metaclass=ABCMeta):
     @abstractmethod
     def find_all_by_book_id(self, book_id: int) -> list[Choice]:
         raise NotImplementedError
+
+    @abstractmethod
+    def find_by_id(self, choice_id: int) -> Choice:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_reason(self, choice: Choice) -> Choice:
+        raise NotImplementedError
