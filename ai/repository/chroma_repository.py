@@ -114,7 +114,7 @@ class ChromaRepository(BaseVectorRepository):
             logger.info(f"ChromaDB 저장 완료 - doc_id: {doc_id}")
             
         except Exception as e:
-            logger.error(f"단일 문서 추가 중 오류: {str(e)}")
+            logger.error(f"단일 문서 추가 중 오류: {str(e)}", exc_info=True)
             raise
     
     def get_all_documents(self, book_id: str) -> List[Document]:
@@ -188,5 +188,5 @@ class ChromaRepository(BaseVectorRepository):
             else:
                 logger.info("삭제할 컬렉션이 존재하지 않음")
         except Exception as e:
-            logger.error(f"컬렉션 삭제 중 오류: {str(e)}")
+            logger.error(f"컬렉션 삭제 중 오류: {str(e)}", exc_info=True)
             raise
