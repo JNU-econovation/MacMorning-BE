@@ -10,6 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class ChromaRepository(BaseVectorRepository):
     
     def __init__(self):
@@ -81,7 +82,7 @@ class ChromaRepository(BaseVectorRepository):
         try:
             self.client.get_collection(name=collection_name)
             return True
-        except Exception:
+        except ValueError:
             return False
 
     def add_single_document(self, document: Document, book_id: str) -> None:
