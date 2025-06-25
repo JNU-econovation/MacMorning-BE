@@ -59,3 +59,8 @@ class LastChoiceItem(BaseModel):
 
 class LastChoiceItemList(BaseModel):
     choices: list[LastChoiceItem]
+
+
+# ============================================================================
+class UpdateReasonRequest(BaseModel):
+    reason: str
