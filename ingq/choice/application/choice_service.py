@@ -95,7 +95,7 @@ class ChoiceService:
             raise ChoiceNotFoundException()
 
         choice.reason = reason.reason
-        updated_choice = self.choice_repository.save_reason(choice)
+        updated_choice = self.choice_repository.update_reason(choice)
         content = [
             updated_choice.first_choice,
             updated_choice.second_choice,
