@@ -1,14 +1,11 @@
 from dotenv import load_dotenv
 from fastapi import HTTPException
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.documents import Document
-from langchain_community.vectorstores import FAISS
-from langchain_community.vectorstores.utils import DistanceStrategy
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from openai import OpenAI
 from client.s3_client import get_presigned_url  
+from service.vector_service import VectorService
 import os
 import base64
 import requests 
@@ -26,21 +23,12 @@ class AiService:
             model_name=model_name, 
             temperature=temperature, 
             openai_api_key=self.openai_api_key)
-            
-        self.embedding_model = OpenAIEmbeddings(
-            model=embedding_model_name,
-            openai_api_key=self.openai_api_key
-        )
-
-        self.text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
-            chunk_size=100,
-            chunk_overlap=30,
-            encoding_name='cl100k_base'
-        )
 
         #이미지 생성용 모델 초기화
         self.openai_client = OpenAI(api_key=self.openai_api_key)
         
+        #벡터 서비스 초기화
+        self.vector_service = VectorService()
         
         #이야기 생성 프롬프트 템플릿 초기화
         self.story_prompt = PromptTemplate(
@@ -57,6 +45,20 @@ class AiService:
             """
         )
         self.story_chain = self.story_prompt | self.llm | StrOutputParser()
+        
+        #이야기 생성 프롬프트 템플릿 초기화
+        self.ending_prompt = PromptTemplate(
+            input_variables=["genre", "character", "story", "background"],
+            template="""
+            이야기의 배경: {background}
+            주인공 및 이야기 설정 : {character}
+            장르 : {genre}
+            지금까지의 이야기: {story}
+            
+            지금까지의 이야기를 바탕으로 이야기의 끝을 맺어주세요. 이야기는 10~15문장정도로 끝낼 수 있도록 해 주세요.
+            """
+        )
+        self.ending_chain = self.ending_prompt | self.llm | StrOutputParser()
 
         #시놉시스 생성 프롬프트 템플릿 초기화
         self.synopsys_prompt = PromptTemplate(
@@ -71,58 +73,52 @@ class AiService:
         )
         self.synopsys_chain = self.synopsys_prompt | self.llm | StrOutputParser()
 
-        #벡터 스토어 캐시
-        self.vectorstore = None
-        self.last_story = ""
-
-    def generate_story(self, genre="", character="", background="", story="", choice=""):
-        # story (이전 줄거리) 분할
-        #RecursiveCharacterTextSplitter는 문서를 텍스트 조각으로 분할하는 인스턴스를 생성
-        #test_splitter.split_document()는 로드된 문서 객체를 여러 개의 청크로 분할
-        #100개씩 쪼개되, 30개씩 겹쳐도됨.
+    def generate_story(self, book_id, genre="", character="", background="", choice="", is_ending=False):
         try:
-            if story != self.last_story :
-                chunks = self.text_splitter.split_text(story)
-                split_docs = [
-                    Document(page_content=chunk, metadata={"chunk_id": i})
-                    for i, chunk in enumerate(chunks)
-                ]
-
-
-                #FAISS 벡터스토어를 사용하여 문서의 임베딩을 저장
-                #DistanceStrategy.COSINE은 유사도 측정기준을 코사인으로 함.
-                self.vectorstore = FAISS.from_documents(
-                    split_docs,
-                    embedding=self.embedding_model,
-                    distance_strategy=DistanceStrategy.COSINE
-                )
-
-                self.last_story = story
-
-            #가장 유사도가 높은 문장 k개를 추출
-            #lamda_mult는 유사도와 다양성 사이에 적용될 수준. 0에 가까울수록 다양성 우선, 1에 가까울수록 유사도 우선.
-            if self.vectorstore is None:
-                raise HTTPException(status_code=500, detail="Vectorstore가 초기화되지 않았습니다.")
-            retriever = self.vectorstore.as_retriever(
-                search_type='mmr',
-                search_kwargs={'k': 5, 'lambda_mult': 0.15}
-            )
-
-            #검색 쿼리 - 실제로 이야기의 다음 내용을 이어가는게 아닌, 이야기의 다음 내용을 풀어나가기 위해 필요한 내용을 찾아서 반환하는 과정입니다. story_prompt랑 다름!
-            query = f"내 선택 : {choice}"
-
-            relevant_docs = retriever.get_relevant_documents(query)
-            sorted_docs = sorted(relevant_docs, key=lambda x: x.metadata.get('chunk_id', 0))
-            relevant_story = '\n\n'.join([doc.page_content for doc in sorted_docs])
-
-            # 이야기 생성
-            new_story = self.story_chain.invoke({
-                "genre" : genre,
-                "character": character,
-                "background": background, 
-                "story": relevant_story, 
-                "choice": choice})
-
+            all_vectors = self.vector_service.get_all_story_vectors(str(book_id))
+            has_existing_story = len(all_vectors) > 0
+            
+            relevant_context = ""
+            
+            #이야기 마무리 로직
+            if is_ending and has_existing_story:
+                relevant_context = self.vector_service.get_story_context_for_ending(str(book_id))
+                print(f"엔딩 모드 - 컨텍스트 길이 : {len(relevant_context)}")
+            #두번째 이야기 생성부터의 로직
+            elif choice and has_existing_story:
+                similar_docs = self.vector_service.search_similar_content(choice, str(book_id))
+                
+                if similar_docs:
+                    # chunk_id로 정렬
+                    # 벡터화는 순서를 보장하지 않기 때문에, 이야기를 순서대로 정렬하는 과정입니다
+                    sorted_docs = sorted(
+                        similar_docs,
+                        key=lambda x: x.metadata.get('chunk_id', 0)
+                    )
+                    relevant_context = '\n\n'.join([doc.page_content for doc in sorted_docs])
+                    print(f"유사한 문서: {relevant_context}")
+            
+            if is_ending:
+                new_story = self.ending_chain.invoke({
+                    "genre": genre,
+                    "character": character,
+                    "background": background, 
+                    "story": relevant_context,
+                })
+                #이야기가 마무리되었다면 DB에 남아있는 내용 모두 삭제
+                self.vector_service.delete_story(str(book_id))
+            else:
+                new_story = self.story_chain.invoke({
+                    "genre": genre,
+                    "character": character,
+                    "background": background, 
+                    "story": relevant_context,
+                    "choice": choice or "이야기를 시작해주세요"
+                })
+                #새로운 내용 벡터화 하여 저장
+                self.vector_service.add_new_content_to_vector(new_story, str(book_id))
+            
+            
             return {
                 "new_story": new_story,
             }

@@ -1,9 +1,14 @@
-from fastapi import FastAPI, HTTPException, Header, Body
+from fastapi import FastAPI, HTTPException, Header
 from service.ai_service import AiService
-from client.book_client import get_story, get_book, get_all_story
+from client.book_client import get_story, get_book
+from pydantic import BaseModel
 
 app = FastAPI()
 ai = AiService()
+
+class StoryRequest(BaseModel):
+    choice: str
+
 
 @app.post("/v1/book/{book_id}")
 def synopsys(book_id: int, authorization: str = Header(None)):
@@ -38,21 +43,82 @@ def synopsys(book_id: int, authorization: str = Header(None)):
         }
 
 @app.post("/v1/book/{book_id}/story")
-def story(book_id: int, choice: str = Body(None), authorization: str = Header(...)):
+def story(book_id: int, request: StoryRequest, authorization: str = Header(...)):
     try:
         book_info = get_book(book_id, authorization)
-        story = get_all_story(book_id, authorization)
-        if book_info and story:
+
+        if book_info:
             genre = book_info.get("genre")
             character = book_info.get("character")
             background = book_info.get("background")
-            result = ai.generate_story(genre, character, background, story, choice)
-            return {"status": "success", "result":result}
+            result = ai.generate_story(
+                genre = genre,
+                character = character,
+                background = background,
+                choice = request.choice,
+                book_id = book_id)
+            return {"success": True, "data": result, "error": None}
         else:
-            raise HTTPException(status_code=404,detail="데이터가 없습니다.")
+            return {
+                "success": False,
+                "data": None,
+                "error": {
+                    "code": "BOOK001",
+                    "status": 404,
+                    "message": "데이터가 없습니다."
+                }
+            }
     except Exception as e:
-        raise HTTPException(status_code=500,detail=f"책 조회 실패: {e}") from e
+        return {
+            "success": False,
+            "data": None,
+            "error": {
+                "code": "DB001",
+                "status": 500,
+                "message": "DB 연결 실패",
+                "error": str(e)
+            }
+        }
 
+
+@app.post("/v1/book/{book_id}/story/end")
+def end_story(book_id: int, authorization: str = Header(...)):
+    try:
+        book_info = get_book(book_id, authorization)
+
+        if book_info:
+            genre = book_info.get("genre")
+            character = book_info.get("character")
+            background = book_info.get("background")
+            result = ai.generate_story(
+                genre = genre,
+                character = character,
+                background = background,
+                book_id = book_id,
+                is_ending=True)
+            return {"success": True, "data": result, "error": None}
+        else:
+            return {
+                "success": False,
+                "data": None,
+                "error": {
+                    "code": "BOOK001",
+                    "status": 404,
+                    "message": "데이터가 없습니다."
+                }
+            }
+    except Exception as e:
+        return {
+            "success": False,
+            "data": None,
+            "error": {
+                "code": "DB001",
+                "status": 500,
+                "message": "DB 연결 실패",
+                "error": str(e)
+            }
+        }
+    
 @app.post("/v1/book/{book_id}/image/{page_number}")
 def image(book_id: int,page_number: int, authorization: str = Header(None)):
     try:
