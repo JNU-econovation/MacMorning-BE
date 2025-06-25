@@ -60,3 +60,11 @@ class BookRepository(metaclass=ABCMeta):
     @abstractmethod
     def update_is_in_progress_to_false(self, book: Book, db: Session) -> Book:
         raise NotImplementedError
+
+    @abstractmethod
+    def is_bookmarked(self, user_id: Optional[str], book_id: int) -> Optional[bool]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_title_image(self, book: Book) -> None:
+        raise NotImplementedError

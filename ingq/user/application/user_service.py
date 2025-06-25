@@ -7,8 +7,9 @@ from user.application.user_validator import UserValidator
 from user.domain.provider import Provider
 from user.domain.repository.user_repository import UserRepository
 from user.domain.user import User as UserVO
-from user.dto.schemas import SignUpRequest
+from user.dto.schemas import EmailCheckRequest, EmailCheckResponse, SignUpRequest
 from user.exception.user_exceptions import (
+    EmailAlreadyExistsException,
     InvalidCredentialsException,
     UserNotFoundException,
 )
@@ -77,11 +78,12 @@ class UserService:
         if user is None:
             raise InvalidCredentialsException()
         try:
-            self.crypto.verify(password, user.password)
+            if self.crypto.verify(password, user.password):
+                return UserMapper.to_domain_user(user)
+            else:
+                raise InvalidCredentialsException()
         except Exception as err:
             raise InvalidCredentialsException() from err
-
-        return UserMapper.to_domain_user(user)
 
     def find_user_by_id(self, user_id: str) -> UserVO:
         user = self.user_repository.find_by_id(user_id)
@@ -90,3 +92,11 @@ class UserService:
             raise UserNotFoundException()
 
         return UserMapper.to_domain_user(user)
+
+    def check_duplicate_email(self, email: EmailCheckRequest) -> EmailCheckResponse:
+        user = self.user_repository.find_by_email(email.email)
+
+        if user:
+            raise EmailAlreadyExistsException()
+
+        return EmailCheckResponse(message="사용 가능한 이메일 입니다.")

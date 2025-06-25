@@ -1,6 +1,13 @@
+from typing import Optional
+
 from book.domain.book import Book as BookVO
 from book.domain.character import Character as CharacterVO
-from book.dto.schemas import BookItem, CharacterResponse, CreateBookResponse
+from book.dto.schemas import (
+    BookDetailItem,
+    BookItem,
+    CharacterResponse,
+    CreateBookResponse,
+)
 from book.infra.db_models.book import Book
 from core.setting.load_env import CLOUDFRONT_DOMAIN
 
@@ -181,3 +188,27 @@ class BookMapper:
                 )
             )
         return result
+
+    @staticmethod
+    def book_to_book_detail_item(
+        book: Book, username: str, is_bookmarked: Optional[bool]
+    ) -> BookDetailItem:
+        return BookDetailItem(
+            book_id=book.id,
+            title_img_url=CLOUDFRONT_DOMAIN + book.title_img,
+            title=book.title,
+            author=username,
+            background=book.background,
+            is_bookmarked=is_bookmarked,
+            character=CharacterResponse(
+                grammatical_person=book.character.grammatical_person,
+                historical_background=book.character.historical_background,
+                name=book.character.name,
+                age=book.character.age,
+                gender=book.character.gender,
+                characteristic=book.character.characteristic,
+            ),
+            genre=book.genre,
+            created_at=book.created_at,
+            updated_at=book.updated_at,
+        )

@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import OAuth2PasswordRequestForm
 
 from auth.application.auth_service import AuthService
@@ -13,7 +13,12 @@ from core.setting.load_env import (
 )
 from dependencies.containers import Container
 from user.application.user_service import UserService
-from user.dto.schemas import SignUpRequest, SignUpResponse
+from user.dto.schemas import (
+    EmailCheckRequest,
+    EmailCheckResponse,
+    SignUpRequest,
+    SignUpResponse,
+)
 
 router = APIRouter(prefix="/v1", tags=["Auth Router"])
 
@@ -62,6 +67,15 @@ def sign_up(
     return _user
 
 
+@router.post("/email", status_code=200)
+@inject
+def check_duplicate_email(
+    email: EmailCheckRequest,
+    user_service: UserService = Depends(Provide[Container.user_service]),
+) -> EmailCheckResponse:
+    return user_service.check_duplicate_email(email)
+
+
 @router.post("/test-login")
 @inject
 async def test_login(
@@ -87,3 +101,14 @@ async def test_login(
     )
 
     return response
+
+
+@router.get("/verification")
+@inject
+def verify_access_token(
+    request: Request,
+    user_service: UserService = Depends(Provide[Container.user_service]),
+) -> bool:
+    current_user = request.state.current_user
+    user_service.find_user_by_id(current_user.id)
+    return True

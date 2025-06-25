@@ -16,6 +16,7 @@ class Choice:
     third_choice: Optional[str]
     my_choice: int
     is_success: bool
+    reason: Optional[str]
     created_at: datetime
     updated_at: datetime
 
@@ -31,6 +32,7 @@ class Choice:
             third_choice=request.third_choice,
             my_choice=request.my_choice,
             is_success=request.is_success,
+            reason=None,
             created_at=now,
             updated_at=now,
         )

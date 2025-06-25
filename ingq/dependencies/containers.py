@@ -6,6 +6,7 @@ from auth.application.jwt_token_provider import JwtTokenProvider
 from auth.infra.repository.redis_refresh_token_repository import (
     RedisRefreshTokenRepository,
 )
+from book.application.book_reader import BookReader
 from book.application.book_service import BookService
 from book.infra.repository.mysql_book_repository import MysqlBookRepository
 from bookmark.application.bookmark_service import BookmarkService
@@ -13,6 +14,7 @@ from bookmark.infra.repository.mysql_bookmark_repository import MysqlBookmarkRep
 from choice.application.choice_service import ChoiceService
 from choice.infra.repository.mysql_choice_repository import MysqlChoiceRepository
 from illust.application.illust_service import IllustService
+from illust.application.image_validation_service import ImageValidationService
 from illust.infra.repository.mysql_illust_repository import MysqlIllustRepository
 from story.application.story_service import StoryService
 from story.infra.repository.mysql_story_repository import MysqlStoryRepository
@@ -59,7 +61,24 @@ class Container(containers.DeclarativeContainer):
     )
 
     book_repository = providers.Factory(MysqlBookRepository)
-    book_service = providers.Factory(BookService, book_repository=book_repository)
+
+    illust_repository = providers.Factory(MysqlIllustRepository)
+
+    image_validation_service = providers.Factory(
+        ImageValidationService, illust_repository=illust_repository
+    )
+
+    book_service = providers.Factory(
+        BookService,
+        book_repository=book_repository,
+        user_service=user_service,
+        image_validation_service=image_validation_service,
+    )
+
+    book_reader = providers.Factory(
+        BookReader,
+        book_repository=book_repository,
+    )
 
     bookmark_repository = providers.Factory(MysqlBookmarkRepository)
     bookmark_service = providers.Factory(
@@ -68,14 +87,17 @@ class Container(containers.DeclarativeContainer):
         book_service=book_service,
     )
 
-    illust_repository = providers.Factory(MysqlIllustRepository)
     illust_service = providers.Factory(
-        IllustService, illust_repository=illust_repository
+        IllustService,
+        illust_repository=illust_repository,
+        book_reader=book_reader,
     )
 
     choice_repository = providers.Factory(MysqlChoiceRepository)
     choice_service = providers.Factory(
-        ChoiceService, choice_repository=choice_repository
+        ChoiceService,
+        choice_repository=choice_repository,
+        book_reader=book_reader,
     )
 
     story_repository = providers.Factory(MysqlStoryRepository)
