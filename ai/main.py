@@ -59,9 +59,26 @@ def story(book_id: int, request: StoryRequest, authorization: str = Header(...))
                 book_id = book_id)
             return {"success": True, "data": result, "error": None}
         else:
-            raise HTTPException(status_code=404, detail="데이터가 없습니다.")
+            return {
+                "success": False,
+                "data": None,
+                "error": {
+                    "code": "BOOK001",
+                    "status": 404,
+                    "message": "데이터가 없습니다."
+                }
+            }
     except Exception as e:
-        raise HTTPException(status_code=500,detail=f"책 조회 실패: {e}") from e
+        return {
+            "success": False,
+            "data": None,
+            "error": {
+                "code": "DB001",
+                "status": 500,
+                "message": "DB 연결 실패",
+                "error": str(e)
+            }
+        }
 
 
 @app.post("/v1/book/{book_id}/story/end")
@@ -79,11 +96,28 @@ def end_story(book_id: int, authorization: str = Header(...)):
                 background = background,
                 book_id = book_id,
                 is_ending=True)
-            return {"status": "success", "result":result}
+            return {"success": True, "data": result, "error": None}
         else:
-            raise HTTPException(status_code=404,detail="데이터가 없습니다.")
+            return {
+                "success": False,
+                "data": None,
+                "error": {
+                    "code": "BOOK001",
+                    "status": 404,
+                    "message": "데이터가 없습니다."
+                }
+            }
     except Exception as e:
-        raise HTTPException(status_code=500,detail=f"책 조회 실패: {e}") from e
+        return {
+            "success": False,
+            "data": None,
+            "error": {
+                "code": "DB001",
+                "status": 500,
+                "message": "DB 연결 실패",
+                "error": str(e)
+            }
+        }
     
 @app.post("/v1/book/{book_id}/image/{page_number}")
 def image(book_id: int,page_number: int, authorization: str = Header(None)):

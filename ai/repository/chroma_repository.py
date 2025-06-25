@@ -165,7 +165,7 @@ class ChromaRepository(BaseVectorRepository):
             
             return documents
         except Exception as e:
-            logger.error(f"유삳 검색 중 오류: {str(e)}")
+            logger.error(f"유사도 검색 중 오류: {str(e)}")
             return []
     
     def get_document_count(self, book_id: str) -> int:
