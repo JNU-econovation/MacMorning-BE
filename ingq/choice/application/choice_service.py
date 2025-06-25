@@ -10,8 +10,11 @@ from choice.dto.schemas import (
     ChoiceItem,
     CreateChoiceRequest,
     CreateChoiceResponse,
+    LastChoiceItem,
     LastChoiceItemList,
+    UpdateReasonRequest,
 )
+from choice.exception.choice_exception import ChoiceNotFoundException
 from choice.utils.mapper import ChoiceMapper
 from story.exception.story_exception import InvalidUserAccessException
 
@@ -73,3 +76,30 @@ class ChoiceService:
         ]
 
         return LastChoiceItemList(choices=last_choices)
+
+    def update_selected_choice(
+        self,
+        user_id: str,
+        book_id: int,
+        choice_id: int,
+        reason: UpdateReasonRequest,
+    ) -> LastChoiceItem:
+        book = self.book_reader.get_book_by_id_or_throw(book_id)
+
+        if book.user_id != user_id:
+            raise InvalidUserAccessException()
+
+        choice = self.choice_repository.find_by_id(choice_id)
+
+        if choice is None:
+            raise ChoiceNotFoundException()
+
+        choice.reason = reason.reason
+        updated_choice = self.choice_repository.save_reason(choice)
+        content = [
+            updated_choice.first_choice,
+            updated_choice.second_choice,
+            updated_choice.third_choice,
+        ][updated_choice.my_choice - 1]
+
+        return ChoiceMapper.choicevo_to_last_choice_item(updated_choice, content)
