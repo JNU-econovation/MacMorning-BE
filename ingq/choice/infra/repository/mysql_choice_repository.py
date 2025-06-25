@@ -34,3 +34,24 @@ class MysqlChoiceRepository(ChoiceRepository):
                 .all()
             )
             return ChoiceMapper.choices_to_choicesvo(choices)
+
+    def find_by_id(self, choice_id: int) -> ChoiceVO:
+        with SessionLocal() as db:
+            choice = db.query(Choice).filter(Choice.id == choice_id).first()
+
+            if not choice:
+                return None
+
+            return ChoiceMapper.choice_to_choicevo(choice)
+
+    def update_reason(self, choice: ChoiceVO) -> ChoiceVO:
+        with SessionLocal() as db:
+            db_choice = db.query(Choice).filter(Choice.id == choice.id).first()
+
+            if not db_choice:
+                return None
+
+            db_choice.reason = choice.reason
+            db.commit()
+
+            return ChoiceMapper.choice_to_choicevo(db_choice)
