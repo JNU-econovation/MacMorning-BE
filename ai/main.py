@@ -5,18 +5,6 @@ from pydantic import BaseModel
 
 app = FastAPI()
 ai = AiService()
-hardcoded_book_info = {
-    1: {
-        "genre": "판타지",  
-        "character": "용감한 기사 아서. 마법검을 소유하고 있으며, 정의감이 강하다.",
-        "background": "중세 시대의 마법이 존재하는 왕국. 어둠의 마법사가 왕국을 위협하고 있다."
-    },
-    2: {
-        "genre": "SF",
-        "character": "우주 탐험가 제나. 뛰어난 과학자이며 호기심이 많다.",
-        "background": "2150년 미래, 인류가 여러 행성에 식민지를 건설한 시대. 외계 생명체와의 첫 접촉이 이루어지려 하고 있다."
-    }
-}
 
 class StoryRequest(BaseModel):
     choice: str
@@ -57,8 +45,7 @@ def synopsys(book_id: int, authorization: str = Header(None)):
 @app.post("/v1/book/{book_id}/story")
 def story(book_id: int, request: StoryRequest, authorization: str = Header(...)):
     try:
-        # book_info = get_book(book_id, authorization)
-        book_info = hardcoded_book_info.get(book_id)
+        book_info = get_book(book_id, authorization)
 
         if book_info:
             genre = book_info.get("genre")
@@ -70,18 +57,17 @@ def story(book_id: int, request: StoryRequest, authorization: str = Header(...))
                 background = background,
                 choice = request.choice,
                 book_id = book_id)
-            return {"status": "success", "result":result}
+            return {"success": True, "data": result, "error": None}
         else:
-            raise HTTPException(status_code=404,detail="데이터가 없습니다.")
+            raise HTTPException(status_code=404, detail="데이터가 없습니다.")
     except Exception as e:
         raise HTTPException(status_code=500,detail=f"책 조회 실패: {e}") from e
 
 
 @app.post("/v1/book/{book_id}/story/end")
-def end_story(book_id: int, authorization: str=Header(None)):
+def end_story(book_id: int, authorization: str = Header(...)):
     try:
-        # book_info = get_book(book_id, authorization)
-        book_info = hardcoded_book_info.get(book_id)
+        book_info = get_book(book_id, authorization)
 
         if book_info:
             genre = book_info.get("genre")

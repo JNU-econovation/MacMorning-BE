@@ -143,25 +143,29 @@ class ChromaRepository(BaseVectorRepository):
         if not self.exists_collection(book_id):
             return []  # 컬렉션이 없으면 빈 리스트 반환
             
-        collection = self._get_or_create_collection(book_id)
-        
-        # 쿼리 임베딩 생성
-        query_embedding = self.embeddings.embed_query(query)
-        
-        # 검색 실행
-        results = collection.query(
-            query_embeddings=[query_embedding],
-            n_results=k
-        )
-        
-        # Document 객체로 변환
-        documents = []
-        if results['documents'] and results['documents'][0]:
-            for i, doc_text in enumerate(results['documents'][0]):
-                metadata = results['metadatas'][0][i] if results['metadatas'] and results['metadatas'][0] else {}
-                documents.append(Document(page_content=doc_text, metadata=metadata))
-        
-        return documents
+        try:
+            collection = self._get_or_create_collection(book_id)
+            
+            # 쿼리 임베딩 생성
+            query_embedding = self.embeddings.embed_query(query)
+            
+            # 검색 실행
+            results = collection.query(
+                query_embeddings=[query_embedding],
+                n_results=k
+            )
+            
+            # Document 객체로 변환
+            documents = []
+            if results['documents'] and results['documents'][0]:
+                for i, doc_text in enumerate(results['documents'][0]):
+                    metadata = results['metadatas'][0][i] if results['metadatas'] and results['metadatas'][0] else {}
+                    documents.append(Document(page_content=doc_text, metadata=metadata))
+            
+            return documents
+        except Exception as e:
+            logger.error(f"유삳 검색 중 오류: {str(e)}")
+            return []
     
     def get_document_count(self, book_id: str) -> int:
         if not self.exists_collection(book_id):

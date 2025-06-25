@@ -83,9 +83,7 @@ class VectorService:
             return True
             
         except Exception as e:
-            logger.error(f"새로운 내용 벡터 저장 중 오류 발생: {str(e)}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"새로운 내용 벡터 저장 중 오류 발생: {str(e)}", exc_info=True)
             return False
         
     #최근 스토리 청크 조회
