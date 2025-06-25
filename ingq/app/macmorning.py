@@ -54,6 +54,7 @@ def create_app() -> FastAPI:
         "/redoc",
         re.compile(r"^/v1/book/\d+/story/\d+$"),
         re.compile(r"^/v1/book/\d+$"),
+        re.compile(r"^/v1/book/\d+/choice$"),
     ]
 
     app.container = container

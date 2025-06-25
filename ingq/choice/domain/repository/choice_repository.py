@@ -26,3 +26,9 @@ class ChoiceRepository(metaclass=ABCMeta):
     @abstractmethod
     def update_reason(self, choice: Choice) -> Choice:
         raise NotImplementedError
+
+    @abstractmethod
+    def find_all_by_book_id_where_reason_is_not_null(
+        self, book_id: int
+    ) -> list[Choice]:
+        raise NotImplementedError

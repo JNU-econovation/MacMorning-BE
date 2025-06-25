@@ -60,22 +60,39 @@ class ChoiceService:
     ) -> LastChoiceItemList:
         book = self.book_reader.get_book_by_id_or_throw(book_id)
 
-        if book.user_id != user_id:
-            raise InvalidUserAccessException()
+        if book.user_id == user_id:
+            choices = self.choice_repository.find_all_by_book_id(book.id)
 
-        choices = self.choice_repository.find_all_by_book_id(book.id)
+            last_choices = [
+                ChoiceMapper.choicevo_to_last_choice_item(
+                    choice,
+                    [choice.first_choice, choice.second_choice, choice.third_choice][
+                        choice.my_choice - 1
+                    ],
+                )
+                for choice in choices
+            ]
 
-        last_choices = [
-            ChoiceMapper.choicevo_to_last_choice_item(
-                choice,
-                [choice.first_choice, choice.second_choice, choice.third_choice][
-                    choice.my_choice - 1
-                ],
+            return LastChoiceItemList(choices=last_choices)
+
+        if user_id is None or book.user_id != user_id:
+            choices = (
+                self.choice_repository.find_all_by_book_id_where_reason_is_not_null(
+                    book.id
+                )
             )
-            for choice in choices
-        ]
 
-        return LastChoiceItemList(choices=last_choices)
+            last_choices = [
+                ChoiceMapper.choicevo_to_last_choice_item(
+                    choice,
+                    [choice.first_choice, choice.second_choice, choice.third_choice][
+                        choice.my_choice - 1
+                    ],
+                )
+                for choice in choices
+            ]
+
+            return LastChoiceItemList(choices=last_choices)
 
     def update_selected_choice(
         self,

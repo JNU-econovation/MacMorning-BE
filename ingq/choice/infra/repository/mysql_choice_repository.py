@@ -25,7 +25,7 @@ class MysqlChoiceRepository(ChoiceRepository):
 
         return ChoiceMapper.choice_to_choicevo(choice)
 
-    def find_all_by_book_id(self, book_id: int) -> list[Choice]:
+    def find_all_by_book_id(self, book_id: int) -> list[ChoiceVO]:
         with SessionLocal() as db:
             choices = (
                 db.query(Choice)
@@ -55,3 +55,15 @@ class MysqlChoiceRepository(ChoiceRepository):
             db.commit()
 
             return ChoiceMapper.choice_to_choicevo(db_choice)
+
+    def find_all_by_book_id_where_reason_is_not_null(
+        self, book_id: int
+    ) -> list[ChoiceVO]:
+        with SessionLocal() as db:
+            choices = (
+                db.query(Choice)
+                .join(Choice.story)
+                .filter(Story.book_id == book_id, Choice.reason.isnot(None))
+                .all()
+            )
+            return ChoiceMapper.choices_to_choicesvo(choices)
