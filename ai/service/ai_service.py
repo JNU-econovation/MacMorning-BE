@@ -9,7 +9,11 @@ from service.vector_service import VectorService
 import os
 import base64
 import requests 
+import logging
+
 load_dotenv()
+logger = logging.getLogger(__name__)
+
 
 class AiService:
     def __init__(self, model_name="gpt-4o-mini", embedding_model_name="text-embedding-3-small", temperature=0.7):
@@ -62,13 +66,17 @@ class AiService:
 
         #시놉시스 생성 프롬프트 템플릿 초기화
         self.synopsys_prompt = PromptTemplate(
-            input_variables=["genre", "character", "background"],
+            input_variables=["genre", "character"],
             template="""
-            이야기의 배경: {background}
             주인공 및 이야기 설정 : {character}
             장르 : {genre}
             
-            주어진 배경, 주인공 및 이야기 세부설정으로 해당 장르의 간단한 동화 시놉시스를 만들어줘.
+            주어진 배경, 주인공 및 이야기 세부설정으로 해당 장르의 간단한 동화 시놉시스와, 그에 적합한 동화 제목을 만들어줘.
+            다음 JSON 형식으로만 답변해주세요:
+            {{
+                "title": "동화 제목",
+                "synopsys": "시놉시스 내용"
+            }}
             """
         )
         self.synopsys_chain = self.synopsys_prompt | self.llm | StrOutputParser()
@@ -96,7 +104,7 @@ class AiService:
                         key=lambda x: x.metadata.get('chunk_id', 0)
                     )
                     relevant_context = '\n\n'.join([doc.page_content for doc in sorted_docs])
-                    print(f"유사한 문서: {relevant_context}")
+                    logger.debug(f"유사한 문서: {relevant_context}")
             
             if is_ending:
                 new_story = self.ending_chain.invoke({
@@ -123,24 +131,50 @@ class AiService:
                 "new_story": new_story,
             }
         except Exception as e:
-            print(f"이야기 생성 중 오류가 발생했습니다: {str(e)}")
+            logger.error(f"이야기 생성 중 오류가 발생했습니다: {str(e)}")
             return {
                 "story": None,
                 "error": str(e)
             }
         
-    def generate_synopsys(self, genre="", character="", background=""):
+    def generate_synopsys(self, genre, character):
         try:
-            synopsys = self.synopsys_chain.invoke({
-                "genre" : genre,
-                "character": character,
-                "background": background, })
+            character_str = f"""
+            이야기 진행시점(1인칭/3인칭): {character.grammatical_person}
+            시대적 배경: {character.historical_background}
+            주인공 이름: {character.name}
+            주인공 나이: {character.age}
+            주인공 성별: {character.gender}
+            주인공 설명: {', '.join(character.characteristic)}
+            """
+
+            genre_str = ', '.join(genre)
+
+            result = self.synopsys_chain.invoke({
+                "genre" : genre_str,
+                "character": character_str})
+
+            # 결과를 파싱해서 제목과 시놉시스 분리
+            lines = result.split('\n')
+            title = ""
+            synopsys = ""
+            
+            current_section = ""
+            for line in lines:
+                if "제목:" in line or "**제목:**" in line:
+                    current_section = "title"
+                    title = line.replace("제목:", "").replace("**제목:**", "").strip()
+                elif "시놉시스:" in line or "**시놉시스:**" in line:
+                    current_section = "synopsys"
+                elif line.strip() and current_section == "synopsys":
+                    synopsys += line.strip() + " "
 
             return {
-                "synopsys": synopsys,
+                "synopsys": synopsys.strip(),
+                "title": title.strip()
             }
         except Exception as e:
-            print(f"시놉시스 생성 중 오류가 발생했습니다: {str(e)}")
+            logger.error(f"시놉시스 생성 중 오류가 발생했습니다: {str(e)}")
             return {
                 "synopsys": None,
                 "error": str(e)
@@ -178,7 +212,7 @@ class AiService:
                     )
                     
                     # S3에 이미지 업로드
-                    print(f"S3에 이미지 업로드 중: {presigned_url}")
+                    logger.info(f"S3에 이미지 업로드 중: {presigned_url}")
                     response = requests.put(
                         presigned_url,
                         data=image_bytes,
@@ -195,7 +229,7 @@ class AiService:
                         "status": "uploaded_to_s3"
                     }
                 except Exception as e:
-                    print(f"Presigned URL 처리 중 오류 발생: {str(e)}")
+                    logger.error(f"Presigned URL 처리 중 오류 발생: {str(e)}")
                     if os.path.exists(filename) :
                         os.remove(filename)
                     return {
@@ -211,7 +245,7 @@ class AiService:
                 }
                 
         except Exception as e:
-            print(f"이미지 생성 중 오류가 발생했습니다: {str(e)}")
+            logger.error(f"이미지 생성 중 오류가 발생했습니다: {str(e)}")
             return {
                 "error": str(e),
                 "image_data": None,
