@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Header
 from service.ai_service import AiService
 from client.book_client import get_story, get_book
+from client.token_client import token_verification
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -9,25 +10,38 @@ ai = AiService()
 class StoryRequest(BaseModel):
     choice: str
 
+class Character(BaseModel):
+    grammatical_person: str
+    historical_background: str
+    name: str
+    age: int
+    gender: str
+    characteristic: list[str]
 
-@app.post("/v1/book/{book_id}")
-def synopsys(book_id: int, authorization: str = Header(None)):
+class BookRequest(BaseModel):
+    genre: list[str]
+    character: Character
+
+@app.post("/v1/book/synopsys")
+def synopsys(request: BookRequest, authorization: str = Header(...)):
     try:
-        book_info = get_book(book_id, authorization)
-        if book_info :
-            genre = book_info.get("genre")
-            character = book_info.get("character")
-            background = book_info.get("background")
-            result = ai.generate_synopsys(genre, character, background)
+        if token_verification(authorization) :
+            genre = request.genre
+            character = request.character
+
+            result = ai.generate_synopsys(
+                genre=genre,
+                character=character
+            )
             return {"success": True, "data": result, "error": None}
         else:
             return {
                 "success": False, 
                 "data": None, 
                 "error": {
-                    "code": "BOOK001", 
-                    "status": 404, 
-                    "message": "데이터가 없습니다."
+                    "code": "TK001", 
+                    "status": 401, 
+                    "message": "인증토큰이 유효하지 않습니다."
                 }
             }
     except Exception as e:
@@ -35,9 +49,9 @@ def synopsys(book_id: int, authorization: str = Header(None)):
             "success": False, 
             "data": None, 
             "error": {
-                "code": "DB001", 
+                "code": "SV001", 
                 "status": 500, 
-                "message": "DB 연결 실패", 
+                "message": "서버 내부 오류", 
                 "error": str(e)
             }
         }

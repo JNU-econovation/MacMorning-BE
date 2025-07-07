@@ -2,7 +2,12 @@ from typing import Any
 from dotenv import load_dotenv
 import requests
 import os
+import logging
+
 load_dotenv()
+logger = logging.getLogger(__name__)
+
+
 class ApiClient :
     def __init__(self) :
         self.base_url = os.getenv("BE_BASE_URL")
@@ -27,6 +32,6 @@ class ApiClient :
             
             return response.json().get("data")
         
-        except requests.exceptions.RequestException as e:
-            print(f"{endpoint} 호출 중 오류 발생: {str(e)}")
+        except Exception as e:
+            logger.error(f"{endpoint} 호출 중 오류 발생: {str(e)}", exc_info=True)
             raise
