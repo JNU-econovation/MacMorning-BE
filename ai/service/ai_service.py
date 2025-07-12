@@ -33,7 +33,23 @@ class AiService:
         
         #벡터 서비스 초기화
         self.vector_service = VectorService()
-        
+
+        #이야기 첫 생성 프롬프트 템플릿 초기화
+        self.start_story_prompt = PromptTemplate(
+            input_variables=["genre", "character", "background", "title"],
+            template="""
+            제목: {title}
+            이야기의 배경: {background}
+            주인공 및 이야기 설정 : {character}
+            장르 : {genre}
+
+            
+            제목, 이야기의 배경, 주인공 및 이야기 설정, 장르에 맞는 동화책의 이야기를 시작해주세요. 10문장이 지나면 선택지를 만들어 주세요.
+            이때 마지막 문장과 선택지가 이야기처럼 자연스럽게 이어질 수 있도록 해 주세요.
+            """
+        )
+        self.start_story_chain = self.start_story_prompt | self.llm | StrOutputParser()
+
         #이야기 생성 프롬프트 템플릿 초기화
         self.story_prompt = PromptTemplate(
             input_variables=["genre", "character", "story", "background", "choice"],
@@ -43,6 +59,7 @@ class AiService:
             장르 : {genre}
             지금까지의 이야기: {story}
             내 선택 : {choice}
+
             
             지금까지의 이야기를 바탕으로 내 선택 다음에 일어날 이야기를 만들어주세요. 10문장이 지나면 선택지를 만들어 주세요.
             이때 마지막 문장과 선택지가 이야기처럼 자연스럽게 이어질 수 있도록 해 주세요.
@@ -81,7 +98,7 @@ class AiService:
         )
         self.synopsys_chain = self.synopsys_prompt | self.llm | StrOutputParser()
 
-    def generate_story(self, book_id, genre="", character="", background="", choice="", is_ending=False):
+    def generate_story(self, book_id, title="", genre="", character="", background="", choice="", is_ending=False, is_start=False):
         try:
             all_vectors = self.vector_service.get_all_story_vectors(str(book_id))
             has_existing_story = len(all_vectors) > 0
@@ -107,7 +124,7 @@ class AiService:
                     logger.debug(f"유사한 문서: {relevant_context}")
             
             if is_ending:
-                new_story = self.ending_chain.invoke({
+                self.ending_chain.invoke({
                     "genre": genre,
                     "character": character,
                     "background": background, 
@@ -115,13 +132,21 @@ class AiService:
                 })
                 #이야기가 마무리되었다면 DB에 남아있는 내용 모두 삭제
                 self.vector_service.delete_story(str(book_id))
+            elif is_start:
+                new_story = self.start_story_chain.invoke({
+                    "genre": genre,
+                    "character": character,
+                    "background": background,
+                    "title": title,
+                    "choice": "이야기를 시작해주세요"
+                })
             else:
                 new_story = self.story_chain.invoke({
                     "genre": genre,
                     "character": character,
                     "background": background, 
                     "story": relevant_context,
-                    "choice": choice or "이야기를 시작해주세요"
+                    "choice": choice
                 })
                 #새로운 내용 벡터화 하여 저장
                 self.vector_service.add_new_content_to_vector(new_story, str(book_id))

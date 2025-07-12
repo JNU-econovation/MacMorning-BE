@@ -7,10 +7,10 @@ load_dotenv()
 
 @dataclass
 class VectorConfig:
-    chroma_host: str = "localhost"
-    chroma_port: int = 8000
+    chroma_host: str = os.getenv("CHROMA_HOST")
+    chroma_port: int = os.getenv("CHROMA_PORT")
     chroma_collection_name: str = "story_chunks"
-    chroma_persist_directory: str = "./chroma_db"
+    chroma_persist_directory: str = os.getenv("./chroma_db")
     
     embedding_model_name: str = "text-embedding-3-small"
     openai_api_key: Optional[str] = None
