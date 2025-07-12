@@ -19,31 +19,26 @@ class Character(BaseModel):
     characteristic: list[str]
 
 class BookRequest(BaseModel):
+    title: str
+    background: str
     genre: list[str]
     character: Character
 
-@app.post("/v1/book/synopsys")
-def synopsys(request: BookRequest, authorization: str = Header(...)):
+@app.post("/v1/book/story/start")
+def startStory(request: BookRequest, authorization: str = Header(...)):
     try:
-        if token_verification(authorization) :
-            genre = request.genre
-            character = request.character
-
-            result = ai.generate_synopsys(
-                genre=genre,
-                character=character
-            )
-            return {"success": True, "data": result, "error": None}
-        else:
-            return {
-                "success": False, 
-                "data": None, 
-                "error": {
-                    "code": "TK001", 
-                    "status": 401, 
-                    "message": "인증토큰이 유효하지 않습니다."
-                }
-            }
+        title = request.title
+        background = request.background
+        genre = request.genre
+        character = request.character
+        result = ai.generate_story(
+            title=title,
+            background=background,
+            genre=genre,
+            character=character,
+            is_start=True
+        )
+        return {"success": True, "data": result, "error": None}
     except Exception as e:
         return {
             "success": False, 
