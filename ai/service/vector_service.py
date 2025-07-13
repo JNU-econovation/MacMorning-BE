@@ -100,7 +100,16 @@ class VectorService:
                 reverse=True  # 최신순
             )
             
-            return sorted_docs[:count]
+            recent_docs = sorted_docs[-count:] if len(sorted_docs) >= count else sorted_docs
+        
+            logger.info(f"최근 {len(recent_docs)}개 청크 조회 완료")
+            if recent_docs:
+                first_chunk_id = recent_docs[0].metadata.get('chunk_id', 'None')
+                last_chunk_id = recent_docs[-1].metadata.get('chunk_id', 'None')
+                logger.info(f"청크 범위: {first_chunk_id} ~ {last_chunk_id}")
+            
+            return recent_docs
+            
             
         except Exception as e:
             logger.error(f"최근 스토리 청크 조회 중 오류 발생: {str(e)}")
@@ -114,8 +123,13 @@ class VectorService:
             all_chunks = self.repository.get_all_documents(book_id)
             
             if not all_chunks:
+                logger.warning("엔딩 컨텍스트: 저장된 스토리가 없습니다")
                 return ""
             
+            sorted_chunks = sorted(
+                all_chunks,
+                key=lambda x: x.metadata.get('chunk_id', 0) if x.metadata else 0
+            )
             # 최근 내용 (직접적 컨텍스트)
             recent_content = '\n'.join([doc.page_content for doc in recent_chunks])
             

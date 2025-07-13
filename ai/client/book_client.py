@@ -21,6 +21,6 @@ def get_all_story(book_id, authorization):
 
 #책 정보 받아오는 함수
 def get_book(book_id, authorization):
-    endpoint = f"/v1/book?bookid={book_id}"
+    endpoint = f"/v1/book/{book_id}"
     result = api.request("GET", endpoint, authorization)
     return result
