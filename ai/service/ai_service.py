@@ -58,6 +58,7 @@ class AiService:
             
             제목, 이야기의 배경, 주인공 및 이야기 설정, 장르에 맞는 동화책의 이야기를 시작해주세요. 10문장이 지나면 선택지를 만들어 주세요.
             이때 마지막 문장과 선택지가 이야기처럼 자연스럽게 이어질 수 있도록 해 주세요.
+            
             응답 형식:
             [이야기]
             (여기에 10문장 정도의 이야기를 작성)
@@ -65,6 +66,7 @@ class AiService:
             [선택지]
             1. (첫 번째 선택지)
             2. (두 번째 선택지)
+
             """
         )
         self.start_story_chain = self.start_story_prompt | self.llm | StrOutputParser()
@@ -156,6 +158,7 @@ class AiService:
             return ai_response, "", ""
 
     def generate_story(self, book_id="", title="", genre="", character="", background="", choice="", is_ending=False, is_start=False):
+
         try:
             # 🔥 1단계: 모든 읽기 작업을 먼저 완료
             logger.info(f"📖 1단계: 기존 스토리 조회 시작 - book_id: {book_id}")
@@ -190,6 +193,7 @@ class AiService:
             logger.info(relevant_context)
             if is_ending:
                 ai_response = self.ending_chain.invoke({
+
                     "genre": genre,
                     "character": character,
                     "background": background, 
@@ -209,6 +213,7 @@ class AiService:
             elif is_start:
                 logger.info("🤖 시작 스토리 생성 중")
                 ai_response = self.start_story_chain.invoke({
+
                     "genre": genre,
                     "character": character,
                     "background": background,
