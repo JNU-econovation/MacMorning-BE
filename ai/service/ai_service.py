@@ -10,9 +10,21 @@ import os
 import base64
 import requests 
 import logging
+import re
+import sys
 
 load_dotenv()
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+# 특정 로거의 레벨 설정
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class AiService:
@@ -46,6 +58,13 @@ class AiService:
             
             제목, 이야기의 배경, 주인공 및 이야기 설정, 장르에 맞는 동화책의 이야기를 시작해주세요. 10문장이 지나면 선택지를 만들어 주세요.
             이때 마지막 문장과 선택지가 이야기처럼 자연스럽게 이어질 수 있도록 해 주세요.
+            응답 형식:
+            [이야기]
+            (여기에 10문장 정도의 이야기를 작성)
+            
+            [선택지]
+            1. (첫 번째 선택지)
+            2. (두 번째 선택지)
             """
         )
         self.start_story_chain = self.start_story_prompt | self.llm | StrOutputParser()
@@ -63,6 +82,14 @@ class AiService:
             
             지금까지의 이야기를 바탕으로 내 선택 다음에 일어날 이야기를 만들어주세요. 10문장이 지나면 선택지를 만들어 주세요.
             이때 마지막 문장과 선택지가 이야기처럼 자연스럽게 이어질 수 있도록 해 주세요.
+            
+            응답 형식:
+            [이야기]
+            (여기에 10문장 정도의 이야기를 작성)
+            
+            [선택지]
+            1. (첫 번째 선택지)
+            2. (두 번째 선택지)
             """
         )
         self.story_chain = self.story_prompt | self.llm | StrOutputParser()
@@ -97,43 +124,91 @@ class AiService:
             """
         )
         self.synopsys_chain = self.synopsys_prompt | self.llm | StrOutputParser()
-
-    def generate_story(self, book_id, title="", genre="", character="", background="", choice="", is_ending=False, is_start=False):
+    
+    def _parse_story_and_choices(self, ai_response):
         try:
+            # [이야기]와 [선택지] 섹션으로 분리
+            story_match = re.search(r'\[이야기\](.*?)\[선택지\]', ai_response, re.DOTALL)
+            choices_match = re.search(r'\[선택지\](.*)', ai_response, re.DOTALL)
+            
+            if story_match and choices_match:
+                story = story_match.group(1).strip()
+                choices_text = choices_match.group(1).strip()
+                
+                # 선택지 파싱
+                choice_lines = choices_text.split('\n')
+                choice1 = ""
+                choice2 = ""
+                
+                for line in choice_lines:
+                    line = line.strip()
+                    if line.startswith('1.'):
+                        choice1 = line[2:].strip()
+                    elif line.startswith('2.'):
+                        choice2 = line[2:].strip()
+                
+                return story, choice1, choice2
+            else:
+                return ai_response, "", ""
+                
+        except Exception as e:
+            logger.error(f"이야기 파싱 중 오류: {str(e)}")
+            return ai_response, "", ""
+
+    def generate_story(self, book_id="", title="", genre="", character="", background="", choice="", is_ending=False, is_start=False):
+        try:
+            # 🔥 1단계: 모든 읽기 작업을 먼저 완료
+            logger.info(f"📖 1단계: 기존 스토리 조회 시작 - book_id: {book_id}")
             all_vectors = self.vector_service.get_all_story_vectors(str(book_id))
             has_existing_story = len(all_vectors) > 0
+            logger.info(f"📖 기존 스토리 개수: {len(all_vectors)}")
             
             relevant_context = ""
             
-            #이야기 마무리 로직
+            # 🔥 2단계: 컨텍스트 준비 (읽기 작업)
             if is_ending and has_existing_story:
+                logger.info("📖 2단계: 엔딩 컨텍스트 조회 시작")
                 relevant_context = self.vector_service.get_story_context_for_ending(str(book_id))
-                print(f"엔딩 모드 - 컨텍스트 길이 : {len(relevant_context)}")
-            #두번째 이야기 생성부터의 로직
+                logger.info(f"📖 엔딩 모드 - 컨텍스트 길이: {len(relevant_context)}")
             elif choice and has_existing_story:
+                logger.info(f"📖 2단계: 유사도 검색 시작 - choice: {choice[:50]}...")
                 similar_docs = self.vector_service.search_similar_content(choice, str(book_id))
+                logger.info(f"📖 유사 문서 개수: {len(similar_docs)}")
                 
                 if similar_docs:
                     # chunk_id로 정렬
-                    # 벡터화는 순서를 보장하지 않기 때문에, 이야기를 순서대로 정렬하는 과정입니다
                     sorted_docs = sorted(
                         similar_docs,
                         key=lambda x: x.metadata.get('chunk_id', 0)
                     )
                     relevant_context = '\n\n'.join([doc.page_content for doc in sorted_docs])
-                    logger.debug(f"유사한 문서: {relevant_context}")
+                    logger.debug(f"📖 유사한 문서 컨텍스트 길이: {len(relevant_context)}")
             
+            # 🔥 3단계: AI 스토리 생성 (모든 읽기 작업 완료 후)
+            logger.info("🤖 3단계: AI 스토리 생성 시작")
+            
+            logger.info(relevant_context)
             if is_ending:
-                self.ending_chain.invoke({
+                ai_response = self.ending_chain.invoke({
                     "genre": genre,
                     "character": character,
                     "background": background, 
                     "story": relevant_context,
                 })
-                #이야기가 마무리되었다면 DB에 남아있는 내용 모두 삭제
-                self.vector_service.delete_story(str(book_id))
+                logger.info("🤖 엔딩 스토리 생성 완료")
+                
+                # 🔥 4단계: 엔딩일 때는 삭제 (쓰기 작업)
+                # logger.info("🗑️ 4단계: 스토리 삭제 시작")
+                # self.vector_service.delete_story(str(book_id))
+                # logger.info("🗑️ 스토리 삭제 완료")
+                
+                return {
+                    "story": ai_response,
+                }
+                
             elif is_start:
-                new_story = self.start_story_chain.invoke({
+                logger.info("🤖 시작 스토리 생성 중")
+                ai_response = self.start_story_chain.invoke({
                     "genre": genre,
                     "character": character,
                     "background": background,
@@ -141,22 +216,36 @@ class AiService:
                     "choice": "이야기를 시작해주세요"
                 })
             else:
-                new_story = self.story_chain.invoke({
+                logger.info("🤖 일반 스토리 생성 중")
+                ai_response = self.story_chain.invoke({
                     "genre": genre,
                     "character": character,
                     "background": background, 
                     "story": relevant_context,
                     "choice": choice
                 })
-                #새로운 내용 벡터화 하여 저장
-                self.vector_service.add_new_content_to_vector(new_story, str(book_id))
             
+            logger.info(f"🤖 스토리 생성 완료 - 길이: {len(ai_response)}")
             
+            # 🔥 4단계: 스토리 파싱 (CPU 작업)
+            logger.info("✂️ 4단계: 스토리 파싱 시작")
+            story, choice1, choice2 = self._parse_story_and_choices(ai_response)
+            logger.info(f"✂️ 파싱 완료 - 스토리: {len(story)}자, 선택지1: {choice1[:30] if choice1 else 'None'}...")
+            
+            # 🔥 5단계: 벡터 저장 (쓰기 작업 - 가장 마지막에 실행)
+            logger.info("💾 5단계: 벡터 저장 시작")
+            save_result = self.vector_service.add_new_content_to_vector(story, str(book_id))
+            logger.info(f"💾 벡터 저장 결과: {'성공' if save_result else '실패'}")
+            
+            logger.info("✅ 전체 스토리 생성 과정 완료")
             return {
-                "new_story": new_story,
+                "story": story,
+                "choice1": choice1,
+                "choice2": choice2
             }
+            
         except Exception as e:
-            logger.error(f"이야기 생성 중 오류가 발생했습니다: {str(e)}")
+            logger.error(f"❌ 이야기 생성 중 오류가 발생했습니다: {str(e)}", exc_info=True)
             return {
                 "story": None,
                 "error": str(e)

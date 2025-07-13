@@ -24,8 +24,8 @@ class BookRequest(BaseModel):
     genre: list[str]
     character: Character
 
-@app.post("/v1/book/story/start")
-def startStory(request: BookRequest, authorization: str = Header(...)):
+@app.post("/v1/book/{book_id}/story/start")
+def startStory(book_id: int, request: BookRequest, authorization: str = Header(...)):
     try:
         title = request.title
         background = request.background
@@ -36,6 +36,7 @@ def startStory(request: BookRequest, authorization: str = Header(...)):
             background=background,
             genre=genre,
             character=character,
+            book_id=book_id,
             is_start=True
         )
         return {"success": True, "data": result, "error": None}
@@ -56,7 +57,7 @@ def story(book_id: int, request: StoryRequest, authorization: str = Header(...))
     try:
         book_info = get_book(book_id, authorization)
 
-        if book_info:
+        if book_info :
             genre = book_info.get("genre")
             character = book_info.get("character")
             background = book_info.get("background")
@@ -74,7 +75,7 @@ def story(book_id: int, request: StoryRequest, authorization: str = Header(...))
                 "error": {
                     "code": "BOOK001",
                     "status": 404,
-                    "message": "데이터가 없습니다."
+                    "message": "데이터가 없습니다.",
                 }
             }
     except Exception as e:
