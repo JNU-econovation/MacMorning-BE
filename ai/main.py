@@ -14,7 +14,7 @@ class Character(BaseModel):
     grammatical_person: str
     historical_background: str
     name: str
-    age: int
+    age: str
     gender: str
     characteristic: list[str]
 
