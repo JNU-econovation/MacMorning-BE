@@ -53,6 +53,7 @@ class StoryItem(BaseModel):
     story_id: int
     book_id: int
     page_number: int
+    total_page: int
     story_text: str
     created_at: datetime
     updated_at: datetime

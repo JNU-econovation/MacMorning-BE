@@ -120,8 +120,10 @@ class StoryService:
                 if user_id is None or book.user_id != user_id:
                     raise InvalidUserAccessException()
 
+            total_page = self.book_service.get_total_page(book_id, session)
+
             return GetStoryWithIllustAndChoiceResponse(
-                story=StoryMapper.storyvo_to_story_item(story),
+                story=StoryMapper.storyvo_to_story_item(story, total_page),
                 illust=self.illust_service.get_illust_item_by_story_id(
                     story.id, session
                 ),
