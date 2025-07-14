@@ -68,3 +68,7 @@ class BookRepository(metaclass=ABCMeta):
     @abstractmethod
     def update_title_image(self, book: Book) -> None:
         raise NotImplementedError
+
+    @abstractmethod
+    def get_total_page(self, book_id: int, db: Session) -> int:
+        raise NotImplementedError
