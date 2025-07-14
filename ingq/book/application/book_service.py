@@ -140,3 +140,6 @@ class BookService:
 
         book.title_img = title_img
         self.book_repository.update_title_image(book)
+
+    def get_total_page(self, book_id: int, db: Session) -> int:
+        return self.book_repository.get_total_page(book_id, db)

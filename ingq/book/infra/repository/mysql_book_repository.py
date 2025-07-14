@@ -20,6 +20,7 @@ from book.infra.repository.book_query_builder import BookQueryBuilder
 from book.utils.mapper import BookMapper
 from bookmark.infra.db_models.bookmark import Bookmark
 from db.database import SessionLocal
+from story.infra.db_models.story import Story
 
 
 class MysqlBookRepository(BookRepository):
@@ -224,3 +225,6 @@ class MysqlBookRepository(BookRepository):
             except Exception as exc:
                 db.rollback()
                 raise exc
+
+    def get_total_page(self, book_id: int, db: Session) -> int:
+        return db.query(Story).filter(Story.book_id == book_id).count()
