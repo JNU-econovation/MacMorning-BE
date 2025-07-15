@@ -74,7 +74,12 @@ class BookMapper:
         books_with_username_and_is_bookmarked: list[tuple[Book, str, bool]],
     ) -> list[BookItem]:
         result = []
-        for book, username, is_bookmarked in books_with_username_and_is_bookmarked:
+        for (
+            book,
+            username,
+            is_bookmarked,
+            total_page,
+        ) in books_with_username_and_is_bookmarked:
             result.append(
                 BookItem(
                     book_id=book.id,
@@ -83,6 +88,7 @@ class BookMapper:
                     author=username,
                     background=book.background,
                     is_bookmarked=is_bookmarked,
+                    total_page=total_page,
                 )
             )
         return result
@@ -92,7 +98,7 @@ class BookMapper:
         books_with_username: list[tuple[Book, str]],
     ) -> list[BookItem]:
         result = []
-        for book, username in books_with_username:
+        for book, username, total_page in books_with_username:
             result.append(
                 BookItem(
                     book_id=book.id,
@@ -100,6 +106,7 @@ class BookMapper:
                     title=book.title,
                     author=username,
                     background=book.background,
+                    total_page=total_page,
                 )
             )
         return result
@@ -109,7 +116,12 @@ class BookMapper:
         books_with_username_and_is_bookmarked: list[tuple[Book, str, bool]],
     ) -> list[BookItem]:
         result = []
-        for book, username, is_bookmarked in books_with_username_and_is_bookmarked:
+        for (
+            book,
+            username,
+            is_bookmarked,
+            total_page,
+        ) in books_with_username_and_is_bookmarked:
             result.append(
                 BookItem(
                     book_id=book.id,
@@ -119,6 +131,7 @@ class BookMapper:
                     background=book.background,
                     is_bookmarked=is_bookmarked,
                     is_in_progress=book.is_in_progress,
+                    total_page=total_page,
                 )
             )
         return result
@@ -128,7 +141,7 @@ class BookMapper:
         books_with_username: list[tuple[Book, str]],
     ) -> list[BookItem]:
         result = []
-        for book, username in books_with_username:
+        for book, username, total_page in books_with_username:
             result.append(
                 BookItem(
                     book_id=book.id,
@@ -137,6 +150,7 @@ class BookMapper:
                     author=username,
                     background=book.background,
                     is_bookmarked=True,
+                    total_page=total_page,
                 )
             )
         return result
@@ -153,6 +167,7 @@ class BookMapper:
             username,
             is_bookmarked,
             bookmark_count,
+            total_page,
         ) in books_with_username_and_is_bookmarked_and_bookmark_count:
             result.append(
                 BookItem(
@@ -163,6 +178,7 @@ class BookMapper:
                     background=book.background,
                     is_bookmarked=is_bookmarked,
                     bookmark_count=bookmark_count,
+                    total_page=total_page,
                 )
             )
         return result
@@ -176,6 +192,7 @@ class BookMapper:
             book,
             username,
             bookmark_count,
+            total_page,
         ) in books_with_username_and_bookmark_count:
             result.append(
                 BookItem(
@@ -185,6 +202,7 @@ class BookMapper:
                     author=username,
                     background=book.background,
                     bookmark_count=bookmark_count,
+                    total_page=total_page,
                 )
             )
         return result

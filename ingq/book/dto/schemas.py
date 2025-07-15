@@ -107,6 +107,7 @@ class BookItem(BaseModel):
     )
     is_in_progress: Optional[bool] = None
     bookmark_count: Optional[int] = None
+    total_page: Optional[int] = None
 
 
 # Book 상세 조회 관련 DTO

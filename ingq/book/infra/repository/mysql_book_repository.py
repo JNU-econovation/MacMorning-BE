@@ -74,14 +74,31 @@ class MysqlBookRepository(BookRepository):
             has_next = len(books) > limit
             books_to_return = books[:limit]
 
-            if user_id:  # books: tuple[Book, str, bool] (Book, username, is_bookmarked)
+            if user_id:  # books: tuple[Book, str, bool]
+                books_with_total_page = []
+                for book, username, is_bookmarked in books_to_return:
+                    total_page = self.get_total_page(book.id, db)
+                    books_with_total_page.append(
+                        (book, username, is_bookmarked, total_page)
+                    )
+
                 book_items = BookMapper.to_book_items_in_get_all_books_with_user_id(
-                    books_to_return
+                    books_with_total_page
                 )
-                books = [book for book, _, _ in books_to_return]
-            else:  # books: tuple[Book, str] (Book, username)
-                book_items = BookMapper.to_book_items_in_get_all_books(books_to_return)
-                books = [book for book, _ in books_to_return]
+
+                books = [book for book, _, _, _ in books_with_total_page]
+
+            else:  # books: tuple[Book, str]
+                books_with_total_page = []
+                for book, username in books_to_return:
+                    total_page = self.get_total_page(book.id, db)
+                    books_with_total_page.append((book, username, total_page))
+
+                book_items = BookMapper.to_book_items_in_get_all_books(
+                    books_with_total_page
+                )
+
+                books = [book for book, _, _ in books_with_total_page]
 
             next_cursor = create_next_cursor(books, order_strategy, has_next)
             page_info = PageInfo(has_next=has_next, total_count=total_count)
@@ -114,9 +131,17 @@ class MysqlBookRepository(BookRepository):
             has_next = len(books) > limit
             books_to_return = books[:limit]
 
-            book_items = BookMapper.to_book_items_in_get_mybooks(books_to_return)
+            books_with_total_page = []
+            for book, username, is_bookmarked in books_to_return:
+                total_page = self.get_total_page(book.id, db)
+                books_with_total_page.append(
+                    (book, username, is_bookmarked, total_page)
+                )
 
-            books = [book for book, _, _ in books_to_return]
+            book_items = BookMapper.to_book_items_in_get_mybooks(books_with_total_page)
+
+            books = [book for book, _, _, _ in books_with_total_page]
+
             next_cursor = create_next_cursor(books, order_strategy, has_next)
             page_info = PageInfo(has_next=has_next, total_count=total_count)
 
@@ -142,16 +167,20 @@ class MysqlBookRepository(BookRepository):
                 query, order_strategy, decoded_cursor
             )
 
-            # books: tuple[Book, str] (Book, username)
             books = query.limit(limit + 1).all()
             has_next = len(books) > limit
             books_to_return = books[:limit]
 
+            books_with_total_page = []
+            for book, username in books_to_return:
+                total_page = self.get_total_page(book.id, db)
+                books_with_total_page.append((book, username, total_page))
+
             book_items = BookMapper.to_book_items_in_get_bookmarked_books(
-                books_to_return
+                books_with_total_page
             )
 
-            books = [book for book, _ in books_to_return]
+            books = [book for book, _, _ in books_with_total_page]
             next_cursor = create_next_cursor(books, order_strategy, has_next)
             page_info = PageInfo(has_next=has_next, total_count=total_count)
 
@@ -178,20 +207,37 @@ class MysqlBookRepository(BookRepository):
             has_next = len(books) > limit
             books_to_return = books[:limit]
 
-            if user_id:  # books: tuple[Book, str, bool, int] (Book, username, is_bookmarked, bookmark_count)
+            if user_id:  # books: tuple[Book, str, bool, int]
+                books_with_total_page = []
+                for book, username, is_bookmarked, bookmark_count in books_to_return:
+                    total_page = self.get_total_page(book.id, db)
+                    books_with_total_page.append(
+                        (book, username, is_bookmarked, bookmark_count, total_page)
+                    )
+
                 book_items = BookMapper.to_book_items_in_get_best_books_with_user_id(
-                    books_to_return
+                    books_with_total_page
                 )
 
                 books_with_bookmark_count = [
                     (book, bookmark_count)
-                    for book, _, _, bookmark_count in books_to_return
+                    for book, _, _, bookmark_count, _ in books_with_total_page
                 ]
-            else:  # books: tuple[Book, str, int] (Book, username, bookmark_count)
-                book_items = BookMapper.to_book_items_in_get_best_books(books_to_return)
+            else:  # books: tuple[Book, str, int]
+                books_with_total_page = []
+                for book, username, bookmark_count in books_to_return:
+                    total_page = self.get_total_page(book.id, db)
+                    books_with_total_page.append(
+                        (book, username, bookmark_count, total_page)
+                    )
+
+                book_items = BookMapper.to_book_items_in_get_best_books(
+                    books_with_total_page
+                )
+
                 books_with_bookmark_count = [
                     (book, bookmark_count)
-                    for book, _, bookmark_count in books_to_return
+                    for book, _, bookmark_count, _ in books_with_total_page
                 ]
 
             next_cursor = create_next_bookmark_cursor(
