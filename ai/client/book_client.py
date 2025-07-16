@@ -5,9 +5,12 @@ api = ApiClient()
 logger = logging.getLogger(__name__)
 #스토리 받아오는 함수
 def get_story(book_id, page_number, authorization):
-    endpoint = f"/v1/book/{book_id}/story/{page_number}"
+    endpoint = f"v1/book/{book_id}/story/{page_number}"
     result = api.request("GET", endpoint, authorization)
-    return result.get("story_text")
+    story = result.get("story")
+    if story:
+        return story.get("story_text")
+    return None
 
 #모든 스토리 받아오는 함수 (임시)
 def get_all_story(book_id, authorization):
