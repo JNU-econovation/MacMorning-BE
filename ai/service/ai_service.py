@@ -323,10 +323,9 @@ class AiService:
             if book_id and authorization:
                 try:
                     # BE 서버에서 Presigned URL 가져오기
-                    presigned_url, content_type = get_presigned_url(
+                    presigned_url, content_type, s3_filename = get_presigned_url(
                         filename=filename, 
                         book_id=book_id,
-                        base_url=self.base_url,
                         authorization=authorization
                     )
                     
@@ -345,6 +344,7 @@ class AiService:
                     return {
                         "content_type": content_type,
                         "presigned_url": presigned_url,
+                        "s3_filename": s3_filename,
                         "status": "uploaded_to_s3"
                     }
                 except Exception as e:

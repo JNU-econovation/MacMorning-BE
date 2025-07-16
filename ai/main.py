@@ -3,9 +3,18 @@ from service.ai_service import AiService
 from client.book_client import get_story, get_book
 from client.token_client import token_verification
 from pydantic import BaseModel
+import logging
+import sys
 
 app = FastAPI()
 ai = AiService()
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 class StoryRequest(BaseModel):
     choice: str
