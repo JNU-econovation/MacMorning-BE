@@ -64,3 +64,17 @@ class LastChoiceItemList(BaseModel):
 # ============================================================================
 class UpdateReasonRequest(BaseModel):
     reason: str
+
+
+# ============================================================================
+class UpdateMyChoiceRequest(BaseModel):
+    third_choice: Optional[str] = None
+    my_choice: int
+    is_success: bool
+
+
+class UpdateMyChoiceResponse(BaseModel):
+    choice_id: int
+    third_choice: Optional[str] = None
+    my_choice: int
+    is_success: bool

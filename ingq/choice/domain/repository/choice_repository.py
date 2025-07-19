@@ -24,6 +24,10 @@ class ChoiceRepository(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
+    def update_choice(self, choice: Choice) -> Choice:
+        raise NotImplementedError
+
+    @abstractmethod
     def update_reason(self, choice: Choice) -> Choice:
         raise NotImplementedError
 
