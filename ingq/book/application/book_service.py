@@ -114,11 +114,11 @@ class BookService:
             raise BookNotFoundException()
         return book
 
-    def set_is_in_progress_to_false(self, book: Book, db: Session) -> Book:
+    def set_is_in_progress_to_false(self, book: Book) -> Book:
         now = datetime.now(timezone.utc)
         book.updated_at = now
         book.set_is_in_progress_to_false()
-        return self.book_repository.update_is_in_progress_to_false(book, db)
+        return self.book_repository.update_is_in_progress_to_false(book)
 
     def update_title_image(
         self,

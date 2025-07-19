@@ -45,11 +45,13 @@ class MysqlBookRepository(BookRepository):
 
             return BookMapper.book_to_bookvo(book)
 
-    def update_is_in_progress_to_false(self, book: BookVO, db: Session) -> BookVO:
-        existing_book = db.query(Book).filter(Book.id == book.id).first()
-        existing_book.is_in_progress = book.is_in_progress
-        existing_book.updated_at = book.updated_at
-        return BookMapper.book_to_bookvo(existing_book)
+    def update_is_in_progress_to_false(self, book: BookVO) -> BookVO:
+        with SessionLocal() as db:
+            existing_book = db.query(Book).filter(Book.id == book.id).first()
+            existing_book.is_in_progress = book.is_in_progress
+            existing_book.updated_at = book.updated_at
+            db.commit()
+            return BookMapper.book_to_bookvo(existing_book)
 
     def get_all_books(
         self,
