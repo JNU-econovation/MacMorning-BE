@@ -28,8 +28,8 @@ class Choice(Base):
     first_choice: Mapped[str] = mapped_column(String(127), nullable=False)
     second_choice: Mapped[str] = mapped_column(String(127), nullable=False)
     third_choice: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    my_choice: Mapped[int] = mapped_column(Integer, nullable=False)
-    is_success: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    my_choice: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    is_success: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
     reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=datetime.now(timezone.utc)
