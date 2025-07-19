@@ -18,3 +18,11 @@ class IllustRepository(metaclass=ABCMeta):
     @abstractmethod
     def find_all_by_book_id(self, book_id: int) -> list[Illust]:
         raise NotImplementedError
+
+    @abstractmethod
+    def find_by_id(self, illust_id: int) -> Optional[Illust]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_illust(self, illust: Illust) -> Illust:
+        raise NotImplementedError

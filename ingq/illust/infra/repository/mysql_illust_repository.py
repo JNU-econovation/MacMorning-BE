@@ -34,3 +34,24 @@ class MysqlIllustRepository(IllustRepository):
                 .all()
             )
         return IllustMapper.illusts_to_illustsvo(illusts)
+
+    def find_by_id(self, illust_id: int) -> Optional[IllustVO]:
+        with SessionLocal() as db:
+            illust = db.query(Illust).filter(Illust.id == illust_id).first()
+
+            if not illust:
+                return None
+
+            return IllustMapper.illust_to_illustvo(illust)
+
+    def update_illust(self, illust: IllustVO) -> Optional[IllustVO]:
+        with SessionLocal() as db:
+            db_illust = db.query(Illust).filter(Illust.id == illust.id).first()
+
+            if not db_illust:
+                return None
+
+            db_illust.image_url = illust.image_url
+            db.commit()
+
+            return IllustMapper.illust_to_illustvo(db_illust)
