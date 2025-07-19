@@ -54,6 +54,7 @@ class MysqlChoiceRepository(ChoiceRepository):
             db_choice.third_choice = choice.third_choice
             db_choice.my_choice = choice.my_choice
             db_choice.is_success = choice.is_success
+            db.commit()
 
             return ChoiceMapper.choice_to_choicevo(db_choice)
 
