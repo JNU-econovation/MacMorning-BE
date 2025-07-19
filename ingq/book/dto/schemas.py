@@ -123,6 +123,7 @@ class BookDetailItem(BaseModel):
     )
     character: CharacterResponse
     genre: list[str]
+    is_in_progress: bool
     created_at: datetime
     updated_at: datetime
 
