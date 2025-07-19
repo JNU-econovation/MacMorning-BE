@@ -58,7 +58,7 @@ class BookRepository(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def update_is_in_progress_to_false(self, book: Book, db: Session) -> Book:
+    def update_is_in_progress_to_false(self, book: Book) -> Book:
         raise NotImplementedError
 
     @abstractmethod

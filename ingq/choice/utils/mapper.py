@@ -3,6 +3,7 @@ from choice.dto.schemas import (
     ChoiceItem,
     CreateChoiceResponse,
     LastChoiceItem,
+    UpdateMyChoiceResponse,
 )
 from choice.infra.db_models.choice import Choice
 
@@ -85,4 +86,15 @@ class ChoiceMapper:
             reason=choice.reason,
             created_at=choice.created_at,
             updated_at=choice.updated_at,
+        )
+
+    @staticmethod
+    def choicevo_to_update_my_choice_response(
+        choice: ChoiceVO,
+    ) -> UpdateMyChoiceResponse:
+        return UpdateMyChoiceResponse(
+            choice_id=choice.id,
+            third_choice=choice.third_choice,
+            my_choice=choice.my_choice,
+            is_success=choice.is_success,
         )

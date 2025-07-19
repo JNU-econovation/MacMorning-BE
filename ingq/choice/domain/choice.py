@@ -14,8 +14,8 @@ class Choice:
     first_choice: str
     second_choice: str
     third_choice: Optional[str]
-    my_choice: int
-    is_success: bool
+    my_choice: Optional[int]
+    is_success: Optional[bool]
     reason: Optional[str]
     created_at: datetime
     updated_at: datetime

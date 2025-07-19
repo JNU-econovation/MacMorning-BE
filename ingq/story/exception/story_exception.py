@@ -50,3 +50,12 @@ class StoryNotFoundException(StoryException):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="해당 하는 스토리를 찾을 수 없습니다.",
         )
+
+
+class InvalidBookProgressWithChoiceException(StoryException):
+    def __init__(self):
+        super().__init__(
+            code="STORY006",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="완성된 책에는 선택지를 변경할 수 없습니다.",
+        )

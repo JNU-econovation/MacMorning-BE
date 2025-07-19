@@ -12,11 +12,17 @@ from choice.dto.schemas import (
     CreateChoiceResponse,
     LastChoiceItem,
     LastChoiceItemList,
+    UpdateMyChoiceRequest,
+    UpdateMyChoiceResponse,
     UpdateReasonRequest,
 )
 from choice.exception.choice_exception import ChoiceNotFoundException
 from choice.utils.mapper import ChoiceMapper
-from story.exception.story_exception import InvalidUserAccessException
+from story.exception.story_exception import (
+    InvalidBookProgressWithChoiceException,
+    InvalidChoiceException,
+    InvalidUserAccessException,
+)
 
 
 class ChoiceService:
@@ -93,6 +99,35 @@ class ChoiceService:
             ]
 
             return LastChoiceItemList(choices=last_choices)
+
+    def update_my_choice(
+        self, user_id: str, book_id: int, choice_id: int, choice: UpdateMyChoiceRequest
+    ) -> UpdateMyChoiceResponse:
+        book = self.book_reader.get_book_by_id_or_throw(book_id)
+
+        if book.user_id != user_id:
+            raise InvalidUserAccessException()
+
+        origin_choice = self.choice_repository.find_by_id(choice_id)
+
+        if origin_choice is None:
+            raise ChoiceNotFoundException()
+
+        # is_in_progress가 true 인 경우에만 업데이트 가능해야 함
+        if not book.is_in_progress:
+            raise InvalidBookProgressWithChoiceException()
+
+        # 게임 모드가 아닌 경우 is_success는 반드시 true여야 함
+        if not book.gamemode and not choice.is_success:
+            raise InvalidChoiceException()
+
+        origin_choice.third_choice = choice.third_choice
+        origin_choice.my_choice = choice.my_choice
+        origin_choice.is_success = choice.is_success
+
+        updated_choice = self.choice_repository.update_choice(origin_choice)
+
+        return ChoiceMapper.choicevo_to_update_my_choice_response(updated_choice)
 
     def update_selected_choice(
         self,

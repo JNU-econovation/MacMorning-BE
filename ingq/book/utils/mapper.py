@@ -227,6 +227,7 @@ class BookMapper:
                 characteristic=book.character.characteristic,
             ),
             genre=book.genre,
+            is_in_progress=book.is_in_progress,
             created_at=book.created_at,
             updated_at=book.updated_at,
         )

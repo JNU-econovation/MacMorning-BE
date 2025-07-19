@@ -44,6 +44,20 @@ class MysqlChoiceRepository(ChoiceRepository):
 
             return ChoiceMapper.choice_to_choicevo(choice)
 
+    def update_choice(self, choice: ChoiceVO) -> ChoiceVO:
+        with SessionLocal() as db:
+            db_choice = db.query(Choice).filter(Choice.id == choice.id).first()
+
+            if not db_choice:
+                return None
+
+            db_choice.third_choice = choice.third_choice
+            db_choice.my_choice = choice.my_choice
+            db_choice.is_success = choice.is_success
+            db.commit()
+
+            return ChoiceMapper.choice_to_choicevo(db_choice)
+
     def update_reason(self, choice: ChoiceVO) -> ChoiceVO:
         with SessionLocal() as db:
             db_choice = db.query(Choice).filter(Choice.id == choice.id).first()

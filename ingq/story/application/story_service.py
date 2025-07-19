@@ -16,7 +16,6 @@ from story.dto.schemas import (
 from story.exception.story_exception import (
     DuplicatePageNumberException,
     InvalidBookProgressException,
-    InvalidChoiceException,
     InvalidUserAccessException,
     StoryNotFoundException,
 )
@@ -60,14 +59,21 @@ class StoryService:
                 book, saved_story.id, choice_request, session
             )
 
-            if saved_choice is None:
-                self.book_service.set_is_in_progress_to_false(book, session)
-
         return CreateStoryWithIllustAndChoiceResponse(
             story=StoryMapper.to_create_story_response(saved_story),
             illust=saved_illust,
             choice=saved_choice,
         )
+
+    def end_story(self, user_id: str, book_id: int) -> str:
+        book = self.book_service.get_book_by_id_or_throw(book_id)
+
+        if book.user_id != user_id:
+            raise InvalidUserAccessException()
+
+        self.book_service.set_is_in_progress_to_false(book)
+
+        return "이야기가 완성되었습니다."
 
     def get_story_by_book_id_and_page_number(
         self, book_id: int, page_number: int, db: Optional[Session] = None
@@ -99,8 +105,6 @@ class StoryService:
 
     def _create_choice(self, book, story_id, choice_request, session):
         if choice_request:
-            if not book.gamemode and not choice_request.is_success:
-                raise InvalidChoiceException()
             return self.choice_service.create_choice(story_id, choice_request, session)
         return None
 

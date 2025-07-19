@@ -31,6 +31,17 @@ def create_story(
     )
 
 
+@router.post("/book/{book_id}/end")
+@inject
+def end_story(
+    request: Request,
+    book_id: int,
+    story_service: StoryService = Depends(Provide[Container.story_service]),
+) -> str:
+    current_user = request.state.current_user
+    return story_service.end_story(current_user.id, book_id)
+
+
 @router.get("/book/{book_id}/story/{page_number}", status_code=200)
 @inject
 def get_story_with_illust_and_choice(

@@ -11,6 +11,8 @@ from illust.dto.schemas import (
     CreateIllustResponse,
     IllustItem,
     IllustItemList,
+    UpdateIllustRequest,
+    UpdateIllustResponse,
 )
 from illust.utils.mapper import IllustMapper
 from story.exception.story_exception import InvalidUserAccessException
@@ -38,6 +40,24 @@ class IllustService:
         saved_illust = self.illust_repository.save(illust, db=session)
 
         return IllustMapper.to_create_illust_response(saved_illust)
+
+    def update_illust(
+        self, user_id: str, book_id: int, illust_id: int, illust: UpdateIllustRequest
+    ) -> UpdateIllustResponse:
+        book = self.book_reader.get_book_by_id_or_throw(book_id)
+
+        if book.user_id != user_id:
+            raise InvalidUserAccessException()
+
+        origin_illust = self.illust_repository.find_by_id(illust_id)
+
+        origin_illust.image_url = illust.image_url
+
+        updated_illust = self.illust_repository.update_illust(origin_illust)
+
+        return UpdateIllustResponse(
+            illust_id=updated_illust.id, image_url=updated_illust.image_url
+        )
 
     def get_illust_item_by_story_id(
         self, story_id: int, session: Session

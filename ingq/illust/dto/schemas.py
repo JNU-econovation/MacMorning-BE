@@ -4,7 +4,11 @@ from pydantic import BaseModel, Field
 
 
 class CreateIllustRequest(BaseModel):
-    image_url: str = Field(..., description="이미지 주소")
+    image_url: str = Field(..., description="이미지 이름")
+
+
+class UpdateIllustRequest(BaseModel):
+    image_url: str = Field(..., description="이미지 이름")
 
 
 class CreateIllustResponse(BaseModel):
@@ -13,6 +17,11 @@ class CreateIllustResponse(BaseModel):
     image_url: str
     created_at: datetime
     updated_at: datetime
+
+
+class UpdateIllustResponse(BaseModel):
+    illust_id: int
+    image_url: str
 
 
 # ============================================================================

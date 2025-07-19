@@ -4,7 +4,13 @@ from fastapi import APIRouter, Depends, Request
 from auth.application.jwt_token_provider import JwtTokenProvider
 from auth.utils.user_extractor import get_optional_current_user
 from choice.application.choice_service import ChoiceService
-from choice.dto.schemas import LastChoiceItem, LastChoiceItemList, UpdateReasonRequest
+from choice.dto.schemas import (
+    LastChoiceItem,
+    LastChoiceItemList,
+    UpdateMyChoiceRequest,
+    UpdateMyChoiceResponse,
+    UpdateReasonRequest,
+)
 from dependencies.containers import Container
 
 router = APIRouter(prefix="/v1", tags=["Choice Router"])
@@ -25,9 +31,22 @@ def get_all_selected_choice(
     return choice_service.get_selected_choice_item_by_book_id(user_id, book_id)
 
 
+@router.patch("/book/{book_id}/choice/{choice_id}/mychoice")
+@inject
+def update_my_choice(
+    request: Request,
+    book_id: int,
+    choice_id: int,
+    choice: UpdateMyChoiceRequest,
+    choice_service: ChoiceService = Depends(Provide[Container.choice_service]),
+) -> UpdateMyChoiceResponse:
+    current_user = request.state.current_user
+    return choice_service.update_my_choice(current_user.id, book_id, choice_id, choice)
+
+
 @router.post("/book/{book_id}/choice/{choice_id}")
 @inject
-def update_choice(
+def update_choice_reason(
     request: Request,
     book_id: int,
     choice_id: int,
