@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 def token_verification(authorization):
-    endpoint = f"/v1/verification"    
+    endpoint = f"v1/verification"    
     try:
         result = api.request("POST", endpoint, authorization)
         if result.get("success") :

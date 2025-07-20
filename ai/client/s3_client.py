@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_presigned_url(filename, book_id, authorization):
-    endpoint = f"/v1/book/{book_id}/story/image"    
+    endpoint = f"v1/book/{book_id}/story/image"    
     payload = {"filename": filename}
     try:
         result = api.request("POST", endpoint, authorization, payload)
