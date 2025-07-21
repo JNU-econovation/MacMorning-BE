@@ -9,7 +9,7 @@ from choice.dto.schemas import (
     LastChoiceItemList,
     UpdateMyChoiceRequest,
     UpdateMyChoiceResponse,
-    UpdateReasonRequest,
+    UpdateReasonListRequest,
 )
 from dependencies.containers import Container
 
@@ -44,16 +44,13 @@ def update_my_choice(
     return choice_service.update_my_choice(current_user.id, book_id, choice_id, choice)
 
 
-@router.post("/book/{book_id}/choice/{choice_id}")
+@router.post("/book/{book_id}/choice/reason")
 @inject
 def update_choice_reason(
     request: Request,
     book_id: int,
-    choice_id: int,
-    reason: UpdateReasonRequest,
+    reasons: UpdateReasonListRequest,
     choice_service: ChoiceService = Depends(Provide[Container.choice_service]),
-) -> LastChoiceItem:
+) -> list[LastChoiceItem]:
     current_user = request.state.current_user
-    return choice_service.update_selected_choice(
-        current_user.id, book_id, choice_id, reason
-    )
+    return choice_service.update_selected_choice(current_user.id, book_id, reasons)
