@@ -63,7 +63,12 @@ class LastChoiceItemList(BaseModel):
 
 # ============================================================================
 class UpdateReasonRequest(BaseModel):
+    choice_id: int
     reason: str
+
+
+class UpdateReasonListRequest(BaseModel):
+    reasons: list[UpdateReasonRequest]
 
 
 # ============================================================================
