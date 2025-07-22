@@ -142,8 +142,20 @@ def end_story(book_id: int, authorization: str = Header(...)):
 def image(book_id: int,page_number: int, authorization: str = Header(None)):
     try:
         content = get_story(book_id, page_number, authorization)
-        if content:
-            result = ai.generate_image(book_id,page_number,authorization,content)
+        book_info = get_book(book_id, authorization)
+        if content and book_info:
+            genre = book_info.get("genre")
+            character = book_info.get("character")
+            background = book_info.get("background")
+            result = ai.generate_image(
+                book_id=book_id,
+                page_number=page_number,
+                authorization=authorization,
+                story=content,
+                genre=genre,
+                character=character,
+                background=background
+            )
             return {"status": "success", "result":result}
         else:
             raise HTTPException(status_code=404,detail="데이터가 없습니다.")
