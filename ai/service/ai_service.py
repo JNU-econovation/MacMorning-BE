@@ -54,7 +54,8 @@ class AiService:
             이야기의 배경: {background}
             주인공 및 이야기 설정 : {character}
             장르 : {genre}
-            제목, 이야기의 배경, 주인공 및 이야기 설정, 장르에 맞는 동화책의 이야기를 시작해주세요. 4문장이 지나면 선택지를 만들어 주세요.
+
+            제목, 이야기의 배경, 주인공 및 이야기 설정, 장르에 맞는 동화책의 이야기를 시작해주세요. 3문장이 지나면 선택지를 만들어 주세요.
             이때 마지막 문장과 선택지가 이야기처럼 자연스럽게 이어질 수 있도록 해 주세요.
             인물의 대사는 개별 문단으로 처리하고, 줄바꿈은 줄바꿈문자를 사용해주세요.
 
@@ -82,7 +83,7 @@ class AiService:
             내 선택 : {choice}
 
             
-            지금까지의 이야기를 바탕으로 내 선택 다음에 일어날 동화책의 이야기를 만들어주세요. 4문장이 지나면 선택지를 만들어 주세요.
+            지금까지의 이야기를 바탕으로 내 선택 다음에 일어날 동화책의 이야기를 만들어주세요. 3문장이 지나면 선택지를 만들어 주세요.
             이때 마지막 문장과 선택지가 이야기처럼 자연스럽게 이어질 수 있도록 해 주세요.
             인물의 대사는 개별 문단으로 처리하고, 줄바꿈은 줄바꿈문자를 사용해주세요.
 
@@ -106,7 +107,8 @@ class AiService:
             장르 : {genre}
             지금까지의 이야기: {story}
             
-            지금까지의 이야기를 바탕으로 이야기의 끝을 맺어주세요. 이야기는 6~7문장정도로 끝낼 수 있도록 해 주세요.
+            지금까지의 이야기를 바탕으로 자연스럽게 이야기의 끝을 맺어주세요. 이야기는 5문장정도로 끝낼 수 있도록 해 주세요..
+            인물의 대사는 개별 문단으로 처리하고, 줄바꿈은 줄바꿈문자를 사용해주세요.
             """
         )
         self.ending_chain = self.ending_prompt | self.llm | StrOutputParser()
@@ -289,15 +291,14 @@ class AiService:
                 "error": str(e)
             }
 
-    def generate_image(self, book_id, page, authorization, story=""):
+    def generate_image(self, book_id, page, authorization, story="", genre=None, character=None, background=None):
         try:
-            base_style = "children's book illustration, soft colors, friendly style, digital art"
-            # OpenAI API를 사용해 이미지 생성
+            base_style = "동화책 일러스트, 부드러운 색감, 친근한 스타일, 디지털 아트, 글씨 없음, 문자 없음, 단어 없음, 텍스트 없음, 일러스트만"
             result = self.openai_client.images.generate(
                 model="gpt-image-1",
                 size="1024x1024",
                 quality="low",
-                prompt=f"{story} in the style of {base_style}",
+                prompt=f"{story} {base_style} 스타일로, 장르 : {genre}, 캐릭터 : {character}, 배경 : {background}",
             )
             # base64 형식의 이미지 데이터 추출
             image_base64 = result.data[0].b64_json
