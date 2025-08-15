@@ -154,6 +154,8 @@ CHROMA_PERSIST_DIR=./chroma_db
   * **프론트엔드 GitHub 저장소**: [MacMorning-FE 바로가기](https://github.com/JNU-econovation/MacMorning-FE)
 
 
+###### 해당 문서는 Gemini 2.5 Pro를 통해 작성되었습니다.
+
 ---
 ### 개발 환경 구축 상세
 
