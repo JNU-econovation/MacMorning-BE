@@ -150,7 +150,7 @@ CHROMA_PERSIST_DIR=./chroma_db
 ## 📜 API 문서 및 관련 링크
 
   * **자동 생성 API 문서**: 서버가 정상적으로 실행되면, 브라우저에서 `http://localhost:8000/docs` 로 접속하여 자동 생성된 FastAPI API 문서를 확인할 수 있습니다.
-  * **API 명세서 (Notion)**: [전체 API 명세서 확인하기](https://www.google.com/search?q=https://www.notion.so/API-88722b4676444633b4991104e797e870)
+  * **API 명세서 (Notion)**: [전체 API 명세서 확인하기](https://woolly-water-e84.notion.site/api-1b9e1f841e7d80edbed2d1b5dbe7616b?source=copy_link)
   * **프론트엔드 GitHub 저장소**: [MacMorning-FE 바로가기](https://github.com/JNU-econovation/MacMorning-FE)
 
 
